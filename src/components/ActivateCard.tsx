@@ -53,7 +53,7 @@ const ActivateCard = () => {
     <div className="mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-4">
       <div className="flex w-full flex-col items-center space-y-[60px] md:space-y-[97.5px]">
         <div className="animate-fade-in">
-          <img src="/arkid-logo.svg" alt="ArkID Logo" className="h-12 w-auto" />
+          <img src="/Logo (1).png" alt="ArkID Logo" className="h-12 w-auto" />
         </div>
 
         <div className="w-full max-w-[400px] rounded-[24px] bg-white p-6 shadow-2xl md:p-8">
@@ -82,7 +82,7 @@ const ActivateCard = () => {
                     htmlFor="username"
                     className="block text-sm font-semibold text-gray-700"
                   >
-                    Your Unique ArkID Username
+                    Card ID
                   </label>
                   <input
                     {...register("username")}
@@ -131,10 +131,7 @@ const ActivateCard = () => {
 
                 <div className="">
                   <p className="text-[16px] text-black font-regular">
-                    Your card will redirect to: https://
-                    <span className="font-medium">
-                      ark-id.com/{watchedUsername || "your-username"}
-                    </span>
+                    Card ID was sent to your email during purchase
                   </p>
                 </div>
 

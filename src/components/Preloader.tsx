@@ -29,7 +29,7 @@ const Preloader = ({ onComplete }: PreloaderProps) => {
         }}
         className=""
       >
-        <img src="/arkid-logo.svg" alt="ArkID Logo" />
+        <img src="/Logo (1).png" alt="ArkID Logo" />
       </motion.div>
     </div>
   );

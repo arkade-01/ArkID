@@ -1,5 +1,8 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useState } from "react";
+import LandingPage from "./pages/LandingPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import PaymentCallback from "./pages/PaymentCallback";
 import CardActivate from "./pages/CardActiviate";
 import CardNotActivatedPage from "./pages/CardNotActivated";
 import Dashboard from "./pages/Dashboard";
@@ -22,7 +25,10 @@ function App() {
     appId={import.meta.env.VITE_PRIVY_APP_ID}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<CardActivate />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/payment/callback" element={<PaymentCallback />} />
+          <Route path="/activate" element={<CardActivate />} />
           <Route path="/not-activated" element={<CardNotActivatedPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
