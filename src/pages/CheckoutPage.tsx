@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { validateDiscount } from "../services/api/validateDiscount";
 
 const checkoutSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -16,6 +17,7 @@ const checkoutSchema = z.object({
   address: z.string().min(5, "Please enter your address"),
   city: z.string().min(2, "Please enter your city"),
   state: z.string().min(2, "Please enter your state"),
+  deliveryOption: z.enum(["within-lagos", "outside-lagos"]),
   discountCode: z.string().optional(),
 });
 
@@ -24,25 +26,108 @@ type CheckoutFormData = z.infer<typeof checkoutSchema>;
 const CheckoutPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [appliedDiscount, setAppliedDiscount] = useState<{code: string; amount: number} | null>(null);
+  const [discountError, setDiscountError] = useState<string | null>(null);
+  const [applyingDiscount, setApplyingDiscount] = useState(false);
   const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    getValues,
   } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
     mode: "onBlur",
   });
 
+  const deliveryOption = watch("deliveryOption");
+  const discountCode = watch("discountCode");
+  const basePrice = 25000;
+  const deliveryFee = deliveryOption === "within-lagos" ? 4500 : deliveryOption === "outside-lagos" ? 7000 : 0;
+  const discountAmount = appliedDiscount?.amount || 0;
+  const totalPrice = Math.max(0, basePrice + deliveryFee - discountAmount); // Ensure price doesn't go negative
+
+  const handleApplyDiscount = async () => {
+    const code = getValues("discountCode");
+
+    if (!code || code.trim() === "") {
+      setDiscountError("Please enter a discount code");
+      return;
+    }
+
+    setApplyingDiscount(true);
+    setDiscountError(null);
+
+    try {
+      console.log('Applying discount code:', code);
+
+      // Call API to verify discount code
+      const response = await validateDiscount(code);
+      console.log('Discount API response:', response);
+
+      if (response && response.success) {
+        // Calculate the full discount (base price + delivery fee = free order)
+        const currentDeliveryFee = deliveryOption === "within-lagos" ? 4500 : 7000;
+        const fullDiscountAmount = basePrice + currentDeliveryFee;
+
+        setAppliedDiscount({
+          code: code,
+          amount: fullDiscountAmount
+        });
+        setDiscountError(null);
+        console.log('Discount applied successfully:', fullDiscountAmount);
+      } else {
+        const errorMessage = response?.message || "Invalid discount code";
+        setDiscountError(errorMessage);
+        setAppliedDiscount(null);
+        console.log('Discount code invalid:', errorMessage);
+      }
+    } catch (error) {
+      console.error("Discount verification failed:", error);
+
+      // More detailed error logging
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+
+      setDiscountError("Failed to verify discount code. Please try again.");
+      setAppliedDiscount(null);
+    } finally {
+      setApplyingDiscount(false);
+      console.log('Discount application finished');
+    }
+  };
+
+  const handleRemoveDiscount = () => {
+    setAppliedDiscount(null);
+    setDiscountError(null);
+  };
+
   const onSubmit = async (data: CheckoutFormData) => {
     setIsProcessing(true);
     try {
+      const deliveryFee = data.deliveryOption === "within-lagos" ? 4500 : 7000;
+      const discountAmount = appliedDiscount?.amount || 0;
+      const totalAmount = Math.max(0, 25000 + deliveryFee - discountAmount); // Ensure amount doesn't go negative
+
+      console.log('Order submission:', {
+        basePrice: 25000,
+        deliveryFee,
+        discountAmount,
+        totalAmount,
+        discountCode: appliedDiscount?.code
+      });
+
       const orderData = {
         ...data,
         currency: "NGN",
-        amount: 30000,
-        discountCode: data.discountCode || "",
+        amount: totalAmount,
+        deliveryFee: deliveryFee,
+        discountCode: appliedDiscount?.code || "",
+        discountAmount: discountAmount,
       };
 
       const response = await axios.post(
@@ -51,9 +136,18 @@ const CheckoutPage = () => {
       );
 
       if (response.data.paymentUrl) {
+        // Has payment URL, redirect to payment gateway
         window.location.href = response.data.paymentUrl;
       } else {
-        navigate("/activate");
+        // No payment URL (free order with discount), redirect to payment callback
+        console.log('Order is free, redirecting to payment callback');
+        navigate("/payment/callback", {
+          state: {
+            success: true,
+            orderData: response.data,
+            isFreeOrder: true
+          }
+        });
       }
     } catch (error) {
       console.error("Order failed:", error);
@@ -169,7 +263,7 @@ const CheckoutPage = () => {
           <div className="mb-8 flex justify-center">
             <div className="w-full max-w-sm">
               <img
-                src="/Card (2).png"
+                src="/Ark Identity.png"
                 alt="ArkID Card"
                 className="w-full rounded-2xl shadow-xl"
               />
@@ -177,7 +271,10 @@ const CheckoutPage = () => {
           </div>
 
           <div className="mb-6 text-center">
-            <div className="text-4xl font-bold text-gray-900 md:text-5xl">₦30,000.00</div>
+            <div className="flex items-center justify-center gap-3">
+              <div className="text-2xl font-bold text-gray-400 line-through md:text-3xl">₦30,000.00</div>
+              <div className="text-4xl font-bold text-gray-900 md:text-5xl">₦25,000.00</div>
+            </div>
           </div>
 
           <ul className="mb-8 space-y-3 text-center">
@@ -357,26 +454,146 @@ const CheckoutPage = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    Delivery Option
+                  </label>
+                  <div className="space-y-3">
+                    <label className={`flex cursor-pointer items-center justify-between rounded-lg border-2 p-4 transition-all ${
+                      errors.deliveryOption
+                        ? "border-red-500"
+                        : deliveryOption === "within-lagos"
+                        ? "border-[#d4af37] bg-[#d4af37]/5"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}>
+                      <div className="flex items-center gap-3">
+                        <input
+                          {...register("deliveryOption")}
+                          type="radio"
+                          value="within-lagos"
+                          className="h-4 w-4 text-[#d4af37] focus:ring-[#d4af37]"
+                        />
+                        <span className="text-sm font-medium text-gray-900">Within Lagos</span>
+                      </div>
+                      <span className="text-sm font-bold text-gray-900">₦4,500</span>
+                    </label>
+
+                    <label className={`flex cursor-pointer items-center justify-between rounded-lg border-2 p-4 transition-all ${
+                      errors.deliveryOption
+                        ? "border-red-500"
+                        : deliveryOption === "outside-lagos"
+                        ? "border-[#d4af37] bg-[#d4af37]/5"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}>
+                      <div className="flex items-center gap-3">
+                        <input
+                          {...register("deliveryOption")}
+                          type="radio"
+                          value="outside-lagos"
+                          className="h-4 w-4 text-[#d4af37] focus:ring-[#d4af37]"
+                        />
+                        <span className="text-sm font-medium text-gray-900">Outside Lagos</span>
+                      </div>
+                      <span className="text-sm font-bold text-gray-900">₦7,000</span>
+                    </label>
+                  </div>
+                  {errors.deliveryOption && (
+                    <p className="pl-1 text-xs text-red-500">{errors.deliveryOption.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
                   <label htmlFor="discountCode" className="block text-sm font-semibold text-gray-700">
                     Discount Code (Optional)
                   </label>
-                  <input
-                    {...register("discountCode")}
-                    type="text"
-                    id="discountCode"
-                    placeholder="Enter discount code"
-                    className="w-full rounded-lg border-2 border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition-all placeholder:text-gray-400 focus:border-[#d4af37]"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      {...register("discountCode")}
+                      type="text"
+                      id="discountCode"
+                      placeholder="Enter discount code"
+                      disabled={!!appliedDiscount}
+                      className={`flex-1 rounded-lg border-2 bg-white px-4 py-3 text-gray-900 outline-none transition-all placeholder:text-gray-400 focus:border-[#d4af37] ${
+                        appliedDiscount ? "bg-gray-100 cursor-not-allowed" : ""
+                      }`}
+                    />
+                    {!appliedDiscount ? (
+                      <button
+                        type="button"
+                        onClick={handleApplyDiscount}
+                        disabled={applyingDiscount || !discountCode}
+                        className="rounded-lg bg-[#d4af37] px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-[#c29f2f] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {applyingDiscount ? "Applying..." : "Apply"}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleRemoveDiscount}
+                        className="rounded-lg bg-red-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-red-600"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  {discountError && (
+                    <p className="pl-1 text-xs text-red-500">{discountError}</p>
+                  )}
+                  {appliedDiscount && (
+                    <p className="pl-1 text-xs text-green-600">
+                      Discount applied: ₦{appliedDiscount.amount.toLocaleString()} off
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* Order Summary */}
+            {deliveryOption && (
+              <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6 md:p-8">
+                <h2 className="mb-4 text-xl font-bold text-gray-900">Order Summary</h2>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-gray-700">
+                    <span>Card Price</span>
+                    <span className="font-semibold">₦25,000.00</span>
+                  </div>
+                  <div className="flex items-center justify-between text-gray-700">
+                    <span>Delivery Fee ({deliveryOption === "within-lagos" ? "Within Lagos" : "Outside Lagos"})</span>
+                    <span className="font-semibold">₦{deliveryFee.toLocaleString()}.00</span>
+                  </div>
+                  {appliedDiscount && (
+                    <div className="flex items-center justify-between text-green-600">
+                      <span>Discount ({appliedDiscount.code})</span>
+                      <span className="font-semibold">-₦{discountAmount.toLocaleString()}.00</span>
+                    </div>
+                  )}
+                  <div className="border-t border-gray-300 pt-3">
+                    <div className="flex items-center justify-between text-lg font-bold text-gray-900">
+                      <span>Total</span>
+                      <span>₦{totalPrice.toLocaleString()}.00</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <button
               type="submit"
               disabled={isProcessing}
               className="w-full transform rounded-lg bg-[#d4af37] py-4 text-base font-bold uppercase tracking-wide text-black transition-all hover:bg-[#c29f2f] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {isProcessing ? "Processing..." : "Complete Order & Pay ₦30,000"}
+              {isProcessing ? (
+                "Processing..."
+              ) : deliveryOption && appliedDiscount ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span>Complete Order & Pay</span>
+                  <span className="line-through opacity-70">₦{(basePrice + deliveryFee).toLocaleString()}</span>
+                  <span className="text-lg">₦{totalPrice.toLocaleString()}</span>
+                </span>
+              ) : deliveryOption ? (
+                `Complete Order & Pay ₦${totalPrice.toLocaleString()}`
+              ) : (
+                "Complete Order & Pay"
+              )}
             </button>
           </form>
         </div>
@@ -386,7 +603,7 @@ const CheckoutPage = () => {
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-12 md:grid-cols-[2fr_1fr_1fr_1fr]">
             <div>
-              <img src="/Logo (2).png" alt="ArkID Logo" className="mb-4 h-10 w-auto" />
+              <img src="/ArkID logo-1.png" alt="ArkID Logo" className="mb-4 h-10 w-auto" />
               <p className="text-base text-white">
                 Share your contact info, social media, and portfolio with just one tap
               </p>

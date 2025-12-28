@@ -4,13 +4,28 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useLocation } from "react-router-dom";
+import { usePrivy } from "@privy-io/react-auth";
 import { activateCard } from "../services/api/activateCard";
+import { getUserCards } from "../services/api/getUserCards";
 
 interface CardData {
   username: string;
   isActivated: boolean;
   redirect_url: string | null;
   taps_count: number;
+}
+
+interface UserCard {
+  card_id: string;
+  user_id: string;
+  username: string;
+  email: string;
+  isActivated: boolean;
+  redirect_url: string | null;
+  taps_count: number;
+  valid_redirects_count: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const activateSchema = z.object({
@@ -29,10 +44,10 @@ type ActivateFormData = z.infer<typeof activateSchema>;
 const ActivateCard = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
-  // No longer need authentication check since we removed redirect
-  // const { authenticated, ready } = usePrivy();
+  const { authenticated, ready } = usePrivy();
   const cardData: CardData | null = location.state?.cardData || null;
 
   const {
@@ -45,11 +60,42 @@ const ActivateCard = () => {
     mode: "onBlur",
   });
 
-  useEffect(() => {    
+  useEffect(() => {
     if (cardData && cardData.redirect_url) {
       setValue("redirectUrl", cardData.redirect_url);
     }
   }, [cardData, setValue]);
+
+  // Check if user already has an activated card
+  useEffect(() => {
+    const checkUserCards = async () => {
+      if (!authenticated || !ready) {
+        setChecking(false);
+        return;
+      }
+
+      try {
+        const response = await getUserCards();
+        if (response.success && response.data.length > 0) {
+          // User has cards, check if any are activated
+          const hasActivatedCard = response.data.some((card: UserCard) => card.isActivated);
+          if (hasActivatedCard) {
+            // Redirect to dashboard if user has an activated card
+            navigate("/dashboard");
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Error checking user cards:", err);
+      } finally {
+        setChecking(false);
+      }
+    };
+
+    if (ready) {
+      checkUserCards();
+    }
+  }, [authenticated, ready, navigate]);
 
   const onSubmit = async (data: ActivateFormData) => {
     try {
@@ -70,11 +116,21 @@ const ActivateCard = () => {
     }
   };
 
+  if (checking) {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-4">
+        <div className="animate-fade-in">
+          <img src="/ArkID logo-1.png" alt="ArkID Logo" className="h-12 w-auto animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-4">
       <div className="flex w-full flex-col items-center space-y-15 md:space-y-[97.5px]">
         <div className="animate-fade-in">
-          <img src="/Logo (2).png" alt="ArkID Logo" className="h-12 w-auto" />
+          <img src="/ArkID logo-1.png" alt="ArkID Logo" className="h-12 w-auto" />
         </div>
 
         <div className="w-full max-w-100 rounded-3xl bg-white p-6 shadow-2xl md:p-8">

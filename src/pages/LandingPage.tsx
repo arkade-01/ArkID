@@ -126,9 +126,7 @@ const LandingPage = () => {
         <div className="mx-auto max-w-6xl">
           <div className="text-center">
             <h1 className="mb-4 text-4xl font-bold leading-tight text-gray-900 md:text-5xl lg:text-6xl">
-              The Last Business Card
-              <br />
-              You'll Ever Need
+              Ditch The Paper
             </h1>
             <p className="mx-auto mb-8 max-w-xl text-base text-gray-600 md:text-lg">
               Share your contact info, social media, and portfolio with just one tap

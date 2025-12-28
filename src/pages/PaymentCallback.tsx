@@ -1,17 +1,35 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const PaymentCallback = () => {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const [status, setStatus] = useState<"loading" | "success" | "failed">("loading");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     const verifyPayment = async () => {
+      // Check if this is a free order (from navigation state)
+      const isFreeOrder = location.state?.isFreeOrder;
+      const freeOrderSuccess = location.state?.success;
+
+      if (isFreeOrder && freeOrderSuccess) {
+        // Free order with discount code - no payment needed
+        console.log('Free order detected, showing success');
+        setStatus("success");
+        setMessage("Order confirmed! Your discount code has been applied successfully.");
+
+        // Redirect to activation page after 3 seconds
+        setTimeout(() => {
+          navigate("/activate");
+        }, 3000);
+        return;
+      }
+
       const reference = searchParams.get("reference");
-      
+
       if (!reference) {
         setStatus("failed");
         setMessage("Invalid payment reference");
@@ -43,7 +61,7 @@ const PaymentCallback = () => {
     };
 
     verifyPayment();
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, location.state]);
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">

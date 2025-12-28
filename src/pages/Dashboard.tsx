@@ -96,7 +96,7 @@ const Dashboard = () => {
   if (!ready || loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <img src="/Logo (2).png" alt="Loading..." className="animate-pulse" />
+        <img src="/ArkID logo-1.png" alt="Loading..." className="animate-pulse" />
       </div>
     );
   }
@@ -160,7 +160,7 @@ const Dashboard = () => {
 
             {/* Logo */}
             <div className="mb-8 mt-4">
-              <img src="/Logo (2).png" alt="ArkID Logo" className="h-8 w-auto" />
+              <img src="/ArkID logo-1.png" alt="ArkID Logo" className="h-8 w-auto" />
             </div>
 
             {/* User Info */}
