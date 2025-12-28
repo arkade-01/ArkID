@@ -120,7 +120,7 @@ const ActivateCard = () => {
     return (
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-4">
         <div className="animate-fade-in">
-          <img src="/ArkID logo-1.png" alt="ArkID Logo" className="h-12 w-auto animate-pulse" />
+          <img src="/Logo (2).png" alt="ArkID Logo" className="h-12 w-auto animate-pulse" />
         </div>
       </div>
     );
@@ -130,7 +130,7 @@ const ActivateCard = () => {
     <div className="mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-4">
       <div className="flex w-full flex-col items-center space-y-15 md:space-y-[97.5px]">
         <div className="animate-fade-in">
-          <img src="/ArkID logo-1.png" alt="ArkID Logo" className="h-12 w-auto" />
+          <img src="/Logo (2).png" alt="ArkID Logo" className="h-12 w-auto" />
         </div>
 
         <div className="w-full max-w-100 rounded-3xl bg-white p-6 shadow-2xl md:p-8">

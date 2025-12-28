@@ -33,7 +33,7 @@ const CardNotActivated = () => {
     <div className="flex min-h-screen flex-col items-center justify-center bg-black px-4">
       <div className="flex flex-col items-center space-y-8">
         <div className="animate-fade-in">
-          <img src="/ArkID logo-1.png" alt="ArkID Logo" className="h-12 w-auto" />
+          <img src="/Logo (2).png" alt="ArkID Logo" className="h-12 w-auto" />
         </div>
 
         <div className="text-center space-y-6">

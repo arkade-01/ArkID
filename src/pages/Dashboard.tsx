@@ -96,7 +96,7 @@ const Dashboard = () => {
   if (!ready || loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <img src="/ArkID logo-1.png" alt="Loading..." className="animate-pulse" />
+        <img src="/Logo (2).png" alt="Loading..." className="animate-pulse" />
       </div>
     );
   }
