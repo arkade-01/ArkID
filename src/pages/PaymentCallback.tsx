@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
-import axios from "axios";
 
 const PaymentCallback = () => {
   const [searchParams] = useSearchParams();
@@ -10,7 +9,7 @@ const PaymentCallback = () => {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const verifyPayment = async () => {
+    const handlePaymentStatus = () => {
       // Check if this is a free order (from navigation state)
       const isFreeOrder = location.state?.isFreeOrder;
       const freeOrderSuccess = location.state?.success;
@@ -19,39 +18,45 @@ const PaymentCallback = () => {
         // Free order with discount code - no payment needed
         console.log('Free order detected, showing success');
         setStatus("success");
-        setMessage("Order confirmed! Your discount code has been applied successfully. You can close this tab now.");
+        setMessage("Order confirmed! Your discount code has been applied successfully.");
         return;
       }
 
-      const reference = searchParams.get("reference");
+      // Check the current path to determine status (from backend redirect)
+      const currentPath = window.location.pathname;
 
-      if (!reference) {
-        setStatus("failed");
-        setMessage("Invalid payment reference");
+      if (currentPath === "/payment/success") {
+        const reference = searchParams.get("reference");
+        const orderId = searchParams.get("order");
+        console.log('Payment successful:', { reference, orderId });
+        setStatus("success");
+        setMessage("Payment successful! Your order has been confirmed.");
         return;
       }
 
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/payments/verify/${reference}`
-        );
-
-        if (response.data.success || response.data.status === "success") {
-          setStatus("success");
-          setMessage("Payment successful! Your order has been confirmed. You can close this tab now.");
-        } else {
-          setStatus("failed");
-          setMessage("Payment verification failed. Please contact support.");
-        }
-      } catch (error) {
-        console.error("Payment verification error:", error);
+      if (currentPath === "/payment/failed") {
+        const reference = searchParams.get("reference");
+        console.log('Payment failed:', { reference });
         setStatus("failed");
-        setMessage("An error occurred while verifying your payment.");
+        setMessage("Payment was not completed. Please try again or contact support.");
+        return;
       }
+
+      if (currentPath === "/payment/error") {
+        const errorMessage = searchParams.get("message") || "An error occurred while processing your payment.";
+        console.log('Payment error:', errorMessage);
+        setStatus("failed");
+        setMessage(errorMessage);
+        return;
+      }
+
+      // Default case for /payment/callback (shouldn't normally reach here)
+      setStatus("loading");
+      setMessage("Verifying payment...");
     };
 
-    verifyPayment();
-  }, [searchParams, navigate, location.state]);
+    handlePaymentStatus();
+  }, [searchParams, location.state]);
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">

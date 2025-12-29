@@ -29,6 +29,9 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/payment/callback" element={<PaymentCallback />} />
+          <Route path="/payment/success" element={<PaymentCallback />} />
+          <Route path="/payment/failed" element={<PaymentCallback />} />
+          <Route path="/payment/error" element={<PaymentCallback />} />
           <Route path="/activate" element={<CardActivate />} />
           <Route path="/not-activated" element={<CardNotActivatedPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
