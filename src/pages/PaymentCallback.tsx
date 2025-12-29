@@ -19,12 +19,7 @@ const PaymentCallback = () => {
         // Free order with discount code - no payment needed
         console.log('Free order detected, showing success');
         setStatus("success");
-        setMessage("Order confirmed! Your discount code has been applied successfully.");
-
-        // Redirect to activation page after 3 seconds
-        setTimeout(() => {
-          navigate("/activate");
-        }, 3000);
+        setMessage("Order confirmed! Your discount code has been applied successfully. You can close this tab now.");
         return;
       }
 
@@ -43,12 +38,7 @@ const PaymentCallback = () => {
 
         if (response.data.success || response.data.status === "success") {
           setStatus("success");
-          setMessage("Payment successful! Your order has been confirmed.");
-          
-          // Redirect to activation page after 3 seconds
-          setTimeout(() => {
-            navigate("/activate");
-          }, 3000);
+          setMessage("Payment successful! Your order has been confirmed. You can close this tab now.");
         } else {
           setStatus("failed");
           setMessage("Payment verification failed. Please contact support.");
@@ -97,7 +87,7 @@ const PaymentCallback = () => {
               </h2>
               <p className="mb-6 text-gray-600">{message}</p>
               <p className="text-sm text-gray-500">
-                Redirecting you to activate your card...
+                You have completed payment, you can now close this tab.
               </p>
             </>
           )}
