@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { usePrivy } from "@privy-io/react-auth";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface CardData {
   username: string;
@@ -12,19 +12,36 @@ interface CardData {
 const CardNotActivated = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { authenticated, ready } = usePrivy();
+  const { authenticated, ready, login } = usePrivy();
   const [cardData] = useState<CardData | null>(location.state?.cardData || null);
   const [cardNotFound] = useState<boolean>(location.state?.cardNotFound || false);
+  const loginTriggered = useRef(false);
+
+  // Redirect to activate page after successful login
+  useEffect(() => {
+    if (authenticated && ready && loginTriggered.current) {
+      console.log('User authenticated after login, navigating to activate page');
+      navigate("/activate", { state: { cardData } });
+    }
+  }, [authenticated, ready, navigate, cardData]);
 
   const handleActivate = () => {
     console.log('Activate button clicked', { authenticated, ready, cardData });
-    
+
     if (!ready) {
       console.log('Privy not ready yet');
       return;
     }
-    
-    // Always navigate to activate page - let the activate page handle auth
+
+    // If not authenticated, trigger login first
+    if (!authenticated) {
+      console.log('User not authenticated, triggering login');
+      loginTriggered.current = true;
+      login();
+      return;
+    }
+
+    // User is authenticated, navigate to activate page
     console.log('Navigating to activate page with cardData:', cardData);
     navigate("/activate", { state: { cardData } });
   };

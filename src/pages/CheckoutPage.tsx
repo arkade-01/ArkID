@@ -11,7 +11,7 @@ const checkoutSchema = z.object({
   username: z
     .string()
     .min(3, "Username must be at least 3 characters")
-    .regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, and underscores allowed"),
+    .regex(/^[a-zA-Z0-9_.]+$/, "Only letters, numbers, underscores, and periods allowed"),
   email: z.string().email("Please enter a valid email"),
   phone: z.string().min(10, "Please enter a valid phone number"),
   address: z.string().min(5, "Please enter your address"),
