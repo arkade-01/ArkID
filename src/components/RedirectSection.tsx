@@ -67,7 +67,7 @@ const RedirectSection = ({ currentUrl }: RedirectSectionProps) => {
           value={redirectUrl}
           onChange={(e) => setRedirectUrl(e.target.value)}
           placeholder="https://your-website.com"
-          className="w-full rounded-[12px] border border-[#2F2F32] bg-[#18181B] p-4 text-white placeholder-gray-500 focus:border-[#D4AF37] focus:outline-none"
+          className="w-full rounded-xl border border-[#2F2F32] bg-[#18181B] p-4 text-white placeholder-gray-500 focus:border-[#D4AF37] focus:outline-none"
         />
 
         {message && (
@@ -79,7 +79,7 @@ const RedirectSection = ({ currentUrl }: RedirectSectionProps) => {
         <button 
           onClick={handleUpdateRedirect}
           disabled={isUpdating || !redirectUrl.trim()}
-          className="mt-2 rounded-[12px] bg-[#D4AF37] px-6 py-3 text-sm font-bold text-black hover:bg-[#b8952b] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-2 rounded-xl bg-[#D4AF37] px-6 py-3 text-sm font-bold text-black hover:bg-[#b8952b] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isUpdating ? "Updating..." : "Save Redirect Link"}
         </button>

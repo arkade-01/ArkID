@@ -6,9 +6,9 @@ interface StatCard {
 
 const StatCard = ({ icon, label, value }: StatCard) => {
   return (
-    <div className="flex flex-1 flex-col gap-4 rounded-[8px] bg-[#202022] p-6">
+    <div className="flex flex-1 flex-col gap-4 rounded-lg bg-[#202022] p-6">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#D4AF37]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#D4AF37]">
           <img src={icon} alt="icon" className="h-5 w-5" />
         </div>
 

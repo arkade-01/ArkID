@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
-body {
+/* body {
   background-color: black;
-}
+} */
+ @theme {
+  --color-fadetext: #717D96
+ }
+
+ body {
+  font-family: "Geist", sans-serif;
+ }

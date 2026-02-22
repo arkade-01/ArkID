@@ -208,7 +208,7 @@ const Dashboard = () => {
         {/* Header with gradient background and profile */}
         <div className="relative">
           {/* Gradient Header Background */}
-          <div className="h-48 md:h-64 w-full overflow-hidden rounded-b-[24px] md:rounded-b-[32px]">
+          <div className="h-48 md:h-64 w-full overflow-hidden rounded-b-3xl md:rounded-b-4xl">
             <img 
               src="/header-gradient.svg" 
               alt="Header Background" 
@@ -265,7 +265,7 @@ const Dashboard = () => {
             />
           </div>
 
-          <div className="rounded-[8px] bg-[#202022] p-6 md:p-8">
+          <div className="rounded-lg bg-[#202022] p-6 md:p-8">
             <RedirectSection currentUrl={currentCard?.redirect_url} />
             <ProfileForm userCard={currentCard} />
           </div>

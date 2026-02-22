@@ -27,7 +27,7 @@ const ProfileForm = ({ userCard }: ProfileFormProps) => {
             type="text"
             value={userCard?.username || ""}
             readOnly
-            className="w-full rounded-[12px] border border-[#2F2F32] bg-[#18181B] p-4 text-gray-400 focus:border-[#D4AF37] focus:outline-none cursor-not-allowed"
+            className="w-full rounded-xl border border-[#2F2F32] bg-[#18181B] p-4 text-gray-400 focus:border-[#D4AF37] focus:outline-none cursor-not-allowed"
           />
         </div>
 
@@ -37,7 +37,7 @@ const ProfileForm = ({ userCard }: ProfileFormProps) => {
             type="email"
             value={userCard?.email || ""}
             readOnly
-            className="w-full rounded-[12px] border border-[#2F2F32] bg-[#18181B] p-4 text-gray-400 focus:border-[#D4AF37] focus:outline-none cursor-not-allowed"
+            className="w-full rounded-xl border border-[#2F2F32] bg-[#18181B] p-4 text-gray-400 focus:border-[#D4AF37] focus:outline-none cursor-not-allowed"
           />
         </div>
 
@@ -47,7 +47,7 @@ const ProfileForm = ({ userCard }: ProfileFormProps) => {
             type="text"
             value={userCard?.card_id || ""}
             readOnly
-            className="w-full rounded-[12px] border border-[#2F2F32] bg-[#18181B] p-4 text-gray-400 focus:border-[#D4AF37] focus:outline-none cursor-not-allowed"
+            className="w-full rounded-xl border border-[#2F2F32] bg-[#18181B] p-4 text-gray-400 focus:border-[#D4AF37] focus:outline-none cursor-not-allowed"
           />
         </div>
 
@@ -57,7 +57,7 @@ const ProfileForm = ({ userCard }: ProfileFormProps) => {
             type="text"
             value={userCard?.isActivated ? "Activated" : "Not Activated"}
             readOnly
-            className={`w-full rounded-[12px] border border-[#2F2F32] bg-[#18181B] p-4 focus:border-[#D4AF37] focus:outline-none cursor-not-allowed ${
+            className={`w-full rounded-xl border border-[#2F2F32] bg-[#18181B] p-4 focus:border-[#D4AF37] focus:outline-none cursor-not-allowed ${
               userCard?.isActivated ? "text-green-400" : "text-red-400"
             }`}
           />
@@ -70,7 +70,7 @@ const ProfileForm = ({ userCard }: ProfileFormProps) => {
           type="text"
           value={userCard?.createdAt ? new Date(userCard.createdAt).toLocaleDateString() : ""}
           readOnly
-          className="w-full rounded-[12px] border border-[#2F2F32] bg-[#18181B] p-4 text-gray-400 focus:border-[#D4AF37] focus:outline-none cursor-not-allowed"
+          className="w-full rounded-xl border border-[#2F2F32] bg-[#18181B] p-4 text-gray-400 focus:border-[#D4AF37] focus:outline-none cursor-not-allowed"
         />
       </div>
 
