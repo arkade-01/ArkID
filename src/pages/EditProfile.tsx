@@ -1,9 +1,59 @@
 import { useState } from "react";
 import { Camera } from "lucide-react";
+import { Trash } from "lucide-react";
+import { Plus } from "lucide-react";
+import Select from "react-select";
 
+//component for social
 const Socials = () => {
-  //https://logos.hunter.io/hunter.io
-  return <section>instagram</section>;
+  const options = [
+    { value: "telegram", label: "Telegram" },
+    { value: "twitter", label: "Twitter" },
+    { value: "instagram", label: "Instagram" },
+    { value: "linkedin", label: "LinkedIn" },
+    { value: "snapchat", label: "Snapchat" },
+    { value: "pinterest", label: "Pinterest" },
+    { value: "tiktok", label: "Tiktok" },
+    { value: "substack", label: "Substack" },
+  ];
+
+  const [selected, setSelected] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
+
+  return (
+    <section className="space-y-6 bg-[#F9FAFB] p-5 border border-[#A0ABC0] rounded-xl">
+      <div className="flex gap-3 items-center">
+        <img
+          src={
+            selected
+              ? `https://logos.hunter.io/${selected.label}.com`
+              : `https://placehold.co/10x10`
+          }
+          alt=""
+          className="h-9"
+        />
+        <Select
+          options={options}
+          value={selected}
+          onChange={setSelected}
+          className="w-full"
+        />
+      </div>
+
+      <input
+        type="text"
+        placeholder="link to your profile"
+        className="p-5 border h-10 w-full bg-white rounded-md"
+      />
+
+      <div className="flex justify-between">
+        <div className="border p-1 px-3 bg-[#EDF0F7] text-fadetext">Hidden</div>
+        <Trash color="#717D96" />
+      </div>
+    </section>
+  );
 };
 
 export const EditProfile = () => {
@@ -33,7 +83,7 @@ export const EditProfile = () => {
           <img
             src={preview ?? "https://placehold.co/150x150"}
             alt=""
-            className="rounded-full h-37.5 w-37.5"
+            className="rounded-full h-37.5 w-37.5 border-2 border-white shadow-xl"
           />
           <div className="bg-amber-400 p-3 w-fit rounded-full absolute right-0 -bottom-3">
             <label htmlFor="imageUpload">
@@ -83,11 +133,23 @@ export const EditProfile = () => {
       </form>
 
       <section>
-        <h4 className="font-semibold">Social Links</h4>
-        <div>
+        <h4 className="font-semibold mb-4">Social Links</h4>
+        <div className="space-y-6">
           <Socials />
+          <Socials />
+          <Socials />
+          <button
+            className="border-2 border-dashed border-[#A0ABC0] rounded-lg flex gap-3 w-full justify-center py-5 font-semibold"
+            onClick={() => alert("it is not working yet")}
+          >
+            <Plus /> Add New Link
+          </button>
         </div>
       </section>
+
+      <button className="bg-[#FBBC05] my-6 p-4 w-full rounded-xl text-white font-semibold">
+        Arktivate your card
+      </button>
     </main>
   );
 };

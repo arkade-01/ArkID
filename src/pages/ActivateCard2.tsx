@@ -1,22 +1,28 @@
 import { Mail } from "lucide-react";
 import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
+import useCard from "../hook/card/useCard";
 
 type form = {
   cardId: string;
 };
 
 export const ActivateCard2 = () => {
+  //to track value of input     DON'T TOUCH
   const [value, setValue] = useState("");
+  const { activateCard } = useCard()
 
+  //React hook form
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<form>();
 
+  //React hook form submitter function
   const OnSubmit: SubmitHandler<form> = (data) => {
     console.log(data);
+    activateCard(data.cardId)
   };
 
   return (
@@ -59,7 +65,7 @@ export const ActivateCard2 = () => {
           onChange={(e) => setValue(e.target.value)}
           id="cardid"
           placeholder="e.g., ABC123XYZ"
-          className="border border-fadetext rounded-xl outline-0 p-2 mb-2"
+          className="border border-fadetext rounded-xl outline-0 p-3 mb-2"
         />
         {errors.cardId && (
           <div className="text-red-500 mb-2">{errors.cardId.message}</div>
@@ -71,14 +77,14 @@ export const ActivateCard2 = () => {
         <button
           type="submit"
         //   disabled={value.length > 3 ? false : true}
-          className={`rounded-xl p-2  font-bold ${value.length > 3 ? "text-white bg-[#FBBC05]" : "text-fadetext bg-[#CBD2E0]"}`}
+          className={`rounded-xl p-2 py-3  font-bold ${value.length > 3 ? "text-white bg-[#FBBC05]" : "text-fadetext bg-[#CBD2E0]"}`}
         >
           Activate my card
         </button>
       </form>
 
       <p className="mb-3 mx-auto w-fit text-sm">Can’t find your Card ID</p>
-      <button className="bg-[#EDF0F7] w-full rounded-xl p-2">
+      <button className="bg-[#EDF0F7] w-full rounded-xl p-2 py-3">
         Resend Email
       </button>
     </main>
