@@ -20,7 +20,7 @@ apis.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      toast.error("You have not logged in");
+      toast.error("Unauthorized access, Trying logging in");
 
       // redirect to login
       //delay so notification casn show first

@@ -12,13 +12,18 @@ const useCard = () => {
         card_id: cardId,
       });
 
-      toast.success("Card Arktivated");
+      toast.success(res.data.message);
       navigate("/edit-profile");
 
-      return res.data;
+      // return res.data;
     } catch (err: any) {
-      console.log(`an error happened: ${err?.message}`);
-      toast.error("An error happened");
+      if (err.response) {
+        toast.error(`${err?.response?.data?.message}`); // server responded with an error
+      } else {
+        toast.error(`${err?.message}`); // no response at all
+      }
+      // console.log(`an error happened: ${err?.response?.status}`);
+      // toast.error(`${err?.response?.data?.message}`);
     }
   };
 
