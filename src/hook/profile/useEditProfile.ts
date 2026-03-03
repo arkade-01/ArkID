@@ -1,19 +1,44 @@
 import { toast } from "sonner";
 import apis from "../authAxios";
+import { useNavigate } from "react-router-dom";
 
 export const useEditProfile = () => {
+  const navigate = useNavigate();
 
-    const editProfile = async (data: Record<any, any>) => {
-        try {
-            const res = await apis.patch('/api/card/update', {data})
-            toast.success('profile updated')
+  const editProfile = async (data: Record<any, any>) => {
+    let id: string | number | undefined; //to  manage toast notification state
+    try {
+      id = toast.loading("Updating your Profile...");
+      const res = await apis.patch("/api/card/update", { data });
+      toast.success("Profile Updated", { id });
 
-            return res.data
-        } catch (err : any) {
-            console.log(`an error happened: ${err?.message}`);
-            toast.error('error occurred')
-        }
+      navigate("/dashboard");
+      return res.data;
+    } catch (err: any) {
+      if (err.response) {
+        toast.error(`${err?.response?.data?.message}`, { id }); // server responded with an error
+      } else {
+        toast.error(`${err?.message}`, { id }); // no response at all
+      }
     }
+  };
 
-  return { editProfile }
-}
+  const getProfile = async () => {
+    let id: string | number | undefined; //to  manage toast notification state
+    try {
+      id = toast.loading("Loading...");
+      const res = await apis.get("/api/card/user/cards"); //inital get for the edit page
+      toast.success("Profile ready to edit", { id });
+
+      return res.data;
+    } catch (err: any) {
+      if (err.response) {
+        toast.error(`${err?.response?.data?.message}`, { id }); // server responded with an error
+      } else {
+        toast.error(`${err?.message}`, { id }); // no response at all
+      }
+    }
+  };
+
+  return { editProfile, getProfile };
+};
