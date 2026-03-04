@@ -90,7 +90,7 @@ export const Profile = () => {
                 null
               ),
             )
-          : "hi"}
+          : "Social Links loading...."}
       </section>
     </main>
   );
