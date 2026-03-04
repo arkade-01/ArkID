@@ -3,7 +3,7 @@ import { useState } from "react";
 import LandingPage from "./pages/LandingPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import PaymentCallback from "./pages/PaymentCallback";
-import CardActivate from "./pages/CardActiviate";
+// import CardActivate from "./pages/CardActiviate";
 import CardNotActivatedPage from "./pages/CardNotActivated";
 import Dashboard from "./pages/Dashboard";
 import ScanPage from "./pages/ScanPage";
