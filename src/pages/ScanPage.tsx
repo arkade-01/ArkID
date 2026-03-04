@@ -24,11 +24,11 @@ const ScanPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Debug environment variables
-  console.log('ScanPage - Environment check:', {
-    VITE_API_URL: import.meta.env.VITE_API_URL,
-    VITE_PRIVY_APP_ID: import.meta.env.VITE_PRIVY_APP_ID,
-    username: username
-  });
+  // console.log('ScanPage - Environment check:', {
+  //   VITE_API_URL: import.meta.env.VITE_API_URL,
+  //   VITE_PRIVY_APP_ID: import.meta.env.VITE_PRIVY_APP_ID,
+  //   username: username
+  // });
 
   useEffect(() => {
     const checkCard = async () => {

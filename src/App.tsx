@@ -3,7 +3,7 @@ import { useState } from "react";
 import LandingPage from "./pages/LandingPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import PaymentCallback from "./pages/PaymentCallback";
-import CardActivate from "./pages/CardActiviate";
+// import CardActivate from "./pages/CardActiviate";
 import CardNotActivatedPage from "./pages/CardNotActivated";
 import Dashboard from "./pages/Dashboard";
 import ScanPage from "./pages/ScanPage";
@@ -37,7 +37,7 @@ function App() {
             <Route path="/payment/success" element={<PaymentCallback />} />
             <Route path="/payment/failed" element={<PaymentCallback />} />
             <Route path="/payment/error" element={<PaymentCallback />} />
-            <Route path="/activate" element={<CardActivate />} />
+            {/* <Route path="/activate" element={<CardActivate />} /> */}
             <Route path="/not-activated" element={<CardNotActivatedPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/scan/:username" element={<ScanPage />} />
@@ -46,7 +46,7 @@ function App() {
             <Route element={<AuthContext />}>
               //auth checker
               <Route path="/edit-profile" element={<EditProfile />} />
-              <Route path="/activa2" element={<ActivateCard2 />} />
+              <Route path="/activate" element={<ActivateCard2 />} />
             </Route>
             {/* <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/activa2" element={<ActivateCard2 />} /> */}
