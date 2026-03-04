@@ -9,6 +9,11 @@ import Dashboard from "./pages/Dashboard";
 import ScanPage from "./pages/ScanPage";
 import Preloader from "./components/Preloader";
 import { PrivyProvider } from "@privy-io/react-auth";
+import { ActivateCard2 } from "./pages/ActivateCard2";
+import { EditProfile } from "./pages/EditProfile";
+import { Profile } from "./pages/Profile";
+import { AuthContext } from "./context/AuthContext";
+import { Toaster } from 'sonner';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -22,23 +27,36 @@ function App() {
   }
 
   return (
-    <PrivyProvider 
-    appId={import.meta.env.VITE_PRIVY_APP_ID}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/payment/callback" element={<PaymentCallback />} />
-          <Route path="/payment/success" element={<PaymentCallback />} />
-          <Route path="/payment/failed" element={<PaymentCallback />} />
-          <Route path="/payment/error" element={<PaymentCallback />} />
-          <Route path="/activate" element={<CardActivate />} />
-          <Route path="/not-activated" element={<CardNotActivatedPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/scan/:username" element={<ScanPage />} />
-        </Routes>
-      </BrowserRouter>
-    </PrivyProvider>
+    <>
+      <PrivyProvider appId={import.meta.env.VITE_PRIVY_APP_ID}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/payment/callback" element={<PaymentCallback />} />
+            <Route path="/payment/success" element={<PaymentCallback />} />
+            <Route path="/payment/failed" element={<PaymentCallback />} />
+            <Route path="/payment/error" element={<PaymentCallback />} />
+            <Route path="/activate" element={<CardActivate />} />
+            <Route path="/not-activated" element={<CardNotActivatedPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/scan/:username" element={<ScanPage />} />
+
+            //gizzles implementations
+            <Route element={<AuthContext />}>
+              //auth checker
+              <Route path="/edit-profile" element={<EditProfile />} />
+              <Route path="/activa2" element={<ActivateCard2 />} />
+            </Route>
+            {/* <Route path="/edit-profile" element={<EditProfile />} />
+            <Route path="/activa2" element={<ActivateCard2 />} /> */}
+            
+            <Route path="/profile/:name" element={<Profile />} />
+          </Routes>
+        </BrowserRouter>
+      </PrivyProvider>
+      <Toaster />
+    </>
   );
 }
 

@@ -521,7 +521,7 @@ const CheckoutPage = () => {
                         type="button"
                         onClick={handleApplyDiscount}
                         disabled={applyingDiscount || !discountCode}
-                        className="flex-shrink-0 rounded-lg bg-[#d4af37] px-4 md:px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-[#c29f2f] disabled:cursor-not-allowed disabled:opacity-50 whitespace-nowrap"
+                        className="shrink-0 rounded-lg bg-[#d4af37] px-4 md:px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-[#c29f2f] disabled:cursor-not-allowed disabled:opacity-50 whitespace-nowrap"
                       >
                         {applyingDiscount ? "Applying..." : "Apply"}
                       </button>
@@ -529,7 +529,7 @@ const CheckoutPage = () => {
                       <button
                         type="button"
                         onClick={handleRemoveDiscount}
-                        className="flex-shrink-0 rounded-lg bg-red-500 px-4 md:px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-red-600 whitespace-nowrap"
+                        className="shrink-0 rounded-lg bg-red-500 px-4 md:px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-red-600 whitespace-nowrap"
                       >
                         Remove
                       </button>
