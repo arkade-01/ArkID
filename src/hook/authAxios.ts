@@ -34,4 +34,9 @@ apis.interceptors.response.use(
   },
 );
 
+//no auth needed request instance
+export const noAuth = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
+
 export default apis;

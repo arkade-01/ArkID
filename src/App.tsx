@@ -51,7 +51,7 @@ function App() {
             {/* <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/activa2" element={<ActivateCard2 />} /> */}
             
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:name" element={<Profile />} />
           </Routes>
         </BrowserRouter>
       </PrivyProvider>

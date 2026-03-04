@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import apis from "../authAxios";
+import apis, { noAuth } from "../authAxios";
 import { useNavigate } from "react-router-dom";
 
 export const useEditProfile = () => {
@@ -40,5 +40,23 @@ export const useEditProfile = () => {
     }
   };
 
-  return { editProfile, getProfile };
+  const mainProfile = async (name: string) => {
+    let id: string | number | undefined;
+    try {
+      id = toast.loading("Please wait this profile is loading");
+      const res = await noAuth.get(`/api/card/${name}`);
+      toast.success("Information ready", { id });
+
+      return res.data;
+    } catch (err: any) {
+      if (err.response) {
+        toast.error(`${err?.response?.data?.message}`, { id }); // server responded with an error
+      } else {
+        toast.error(`${err?.message}`, { id }); // no response at all
+      }
+      navigate('/')
+    }
+  };
+
+  return { editProfile, getProfile, mainProfile };
 };
