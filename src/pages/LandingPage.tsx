@@ -89,8 +89,8 @@ const LandingPage = () => {
                 Home
               </a>
               <a 
-                href="#how-it-works" 
-                onClick={() => setIsMobileMenuOpen(false)}
+                // href="#how-it-works" 
+                onClick={() => {setIsMobileMenuOpen(false),  navigate("/how_to_use") }}
                 className="border-b border-gray-100 px-4 py-4 text-base font-medium text-gray-900 transition-colors hover:bg-gray-50"
               >
                 How it Works

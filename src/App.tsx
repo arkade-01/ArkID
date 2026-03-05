@@ -14,6 +14,7 @@ import { EditProfile } from "./pages/EditProfile";
 import { Profile } from "./pages/Profile";
 import { AuthContext } from "./context/AuthContext";
 import { Toaster } from 'sonner';
+import { HowToUse } from "./pages/HowToUse";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +51,7 @@ function App() {
             </Route>
             {/* <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/activa2" element={<ActivateCard2 />} /> */}
-            
+            <Route path="/how_to_use" element={<HowToUse/>}/>
             <Route path="/profile/:name" element={<Profile />} />
           </Routes>
         </BrowserRouter>
