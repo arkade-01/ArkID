@@ -9,7 +9,7 @@ export const useEditProfile = () => {
     let id: string | number | undefined; //to  manage toast notification state
     try {
       id = toast.loading("Updating your Profile...");
-      const res = await apis.patch("/api/card/update", { data });
+      const res = await apis.patch("/api/card/update", data);
       toast.success("Profile Updated", { id });
 
       navigate("/dashboard");
