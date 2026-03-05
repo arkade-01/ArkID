@@ -6,11 +6,11 @@ import Select from "react-select";
 import { useEditProfile } from "../hook/profile/useEditProfile";
 import { toast } from "sonner";
 
-type mainForm = {
-  bio?: string;
-  display_name?: string;
-  social_links?: Array<any>;
-};
+// type mainForm = {
+//   bio?: string;
+//   display_name?: string;
+//   social_links?: Array<any>;
+// };
 
 type social = {
   platform: string;
@@ -64,7 +64,7 @@ const Socials = ({
     inital(platform);
     setLink(url);
     setVisible(visibility);
-    console.log(visibility)
+    console.log(visibility);
   }, [platform, url]);
 
   //on any change/editing of information useEffect
@@ -176,35 +176,41 @@ export const EditProfile = () => {
 
   const Submit = async (e: FormEvent) => {
     e.preventDefault();
-
     const myform = new FormData();
 
-    //submit image change fisrt if available
+    //check for image
     if (image) {
       myform.append("image", image);
-      try {
-        await editProfile(myform);
-      } catch (err: any) {
-        toast.error(`${err?.message}`);
-      }
+    } else {
+      toast.error("no image selected");
+      return;
     }
 
-    //the rest of the body
-    let patchBody: mainForm = {};
-
+    //check for bio
     if (textlength) {
-      patchBody.bio = textlength;
+      myform.append("bio", textlength);
+    } else {
+      toast.error("Bio field empty");
+      return;
     }
 
+    //check for name
     if (name) {
-      patchBody.display_name = name;
+      myform.append("display_name", name);
+    } else {
+      toast.error("Name field empty");
+      return;
     }
 
+    //check for social links
     if (socialArray) {
-      patchBody.social_links = socialArray;
+      myform.append("social_links", JSON.stringify(socialArray));
+    } else {
+      toast.error("No social links");
+      return;
     }
 
-    await editProfile(patchBody);
+    await editProfile(myform);
   };
 
   //initial getting of data
@@ -309,7 +315,7 @@ export const EditProfile = () => {
 
             <button
               className="border-2 border-dashed border-[#A0ABC0] rounded-lg flex gap-3 w-full justify-center py-5 font-semibold"
-              type='button'
+              type="button"
               onClick={() =>
                 setSocialArray((prev) => [
                   ...prev,
