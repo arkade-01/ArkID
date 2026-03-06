@@ -66,12 +66,12 @@ export const Profile = () => {
           className="h-37.5 w-37.5 rounded-full mx-auto object-cover"
         />
         <h4 className="text-center font-bold text-3xl">
-          {allInfo ? allInfo.data.display_name : "John Doe"}
+          {allInfo ? allInfo.data.display_name : "Loading..."}
         </h4>
         <p className="text-center text-fadetext">
           {allInfo
             ? allInfo.data.bio
-            : "Creative Director & Photographer | Helping brands tell their story through visual content | Based in Lagos 🇳🇬"}
+            : " "}
         </p>
         <button
           className="flex gap-3 border border-fadetext rounded-full p-4 mx-auto"

@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import Select from "react-select";
 import { useEditProfile } from "../hook/profile/useEditProfile";
 import { toast } from "sonner";
+import { NewNavBar } from "../components/NewNavBar";
 
 // type mainForm = {
 //   bio?: string;
@@ -231,6 +232,7 @@ export const EditProfile = () => {
 
   return (
     <main className="p-7">
+      <NewNavBar />
       <h1 className="text-3xl font-bold w-fit mx-auto">Edit Your Profile</h1>
       <p className="w-fit mx-auto mb-10">
         Customize your digital business card
