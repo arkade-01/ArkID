@@ -24,7 +24,7 @@ const PersonalLinks = ({ platform, url }: links) => {
         alt=""
         className="w-8 h-8 grayscale"
       />
-      <p>{url}</p>
+      <p>{platform}</p>
       <EllipsisVertical />
     </a>
   );
@@ -81,7 +81,7 @@ export const Profile = () => {
         </button>
       </section>
 
-      <section className="space-y-5">
+      <section className="space-y-5"> 
         {allInfo
           ? allInfo.data.social_links.map((item: any, i: number) =>
               item.visible === true ? (
@@ -90,7 +90,7 @@ export const Profile = () => {
                 null
               ),
             )
-          : "Social Links loading...."}
+          : "No Social links yet..."}
       </section>
     </main>
   );
