@@ -1,73 +1,135 @@
-# React + TypeScript + Vite
+# ArkID — Digital NFC Business Card Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Ditch The Paper, Stay Arktive**
 
-Currently, two official plugins are available:
+ArkID is a digital identity platform that lets you share your contact info, social links, and portfolio with a single NFC tap. Buy a card, activate it, set your redirect URL — and anyone who taps your card gets sent exactly where you want them.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Live site:** https://www.ark-id.xyz
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## What It Does
 
-## Expanding the ESLint configuration
+| Step | What Happens |
+|------|-------------|
+| **Buy** | Purchase an NFC card via the checkout page |
+| **Activate** | Log in and link your Card ID to your account + set a redirect URL |
+| **Share** | Hand someone your card — they tap it and get redirected instantly |
+| **Track** | View tap counts and redirect stats on your dashboard |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Tech Stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+| Category | Tools |
+|----------|-------|
+| **Framework** | React 19, TypeScript, Vite |
+| **Routing** | React Router DOM v7 |
+| **Styling** | Tailwind CSS v4, Framer Motion |
+| **Auth / Web3** | Privy (`@privy-io/react-auth`), Solana (`@solana/web3.js`) |
+| **Forms** | React Hook Form + Zod |
+| **HTTP** | Axios |
+| **Backend** | REST API at `https://arkid-bk3nd.onrender.com` |
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## Project Structure
+
+```
+src/
+├── pages/
+│   ├── LandingPage.tsx        # Marketing homepage
+│   ├── CheckoutPage.tsx       # Purchase flow (form, discount, payment)
+│   ├── CardActiviate.tsx      # Card activation page wrapper
+│   ├── Dashboard.tsx          # Authenticated user dashboard
+│   ├── ScanPage.tsx           # NFC tap handler (smart routing)
+│   └── PaymentCallback.tsx    # Payment gateway callback handler
+├── components/
+│   ├── ActivateCard.tsx       # Activation form (Card ID + redirect URL)
+│   ├── ProfileForm.tsx        # Profile display
+│   ├── RedirectSection.tsx    # Redirect URL management
+│   ├── StatCard.tsx           # Tap / redirect stats
+│   └── Preloader.tsx          # Loading animation
+└── services/
+    ├── config.ts              # Privy auth config
+    └── api/
+        ├── getCard.ts         # GET card by username
+        ├── getUserCards.ts    # GET authenticated user's cards
+        ├── activateCard.ts    # POST activate card
+        ├── updateRedirectUrl.ts  # PUT update redirect URL
+        └── validateDiscount.ts   # POST validate discount code
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Pages & Routes
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Route | Page | Description |
+|-------|------|-------------|
+| `/` | LandingPage | Hero, how-it-works, CTA |
+| `/checkout` | CheckoutPage | NFC card purchase (NGN 25,000 base price) |
+| `/activate` | CardActiviate | Link Card ID to account + set redirect URL |
+| `/dashboard` | Dashboard | Stats, profile, redirect URL management |
+| `/scan/:username` | ScanPage | NFC tap entry point — routes based on card state |
+| `/payment/callback` | PaymentCallback | Payment gateway callback handling |
+
+### Scan Page Routing Logic
+
+When someone taps an NFC card (`/scan/:username`):
+- Card has redirect URL → **redirect immediately**
+- Card exists but not activated → **show "Not Activated" page**
+- User is authenticated → **show dashboard with card data**
+- User not authenticated → **prompt login**
+
+---
+
+## Environment Variables
+
+Create a `.env` file at the project root:
+
+```env
+VITE_PRIVY_APP_ID=your_privy_app_id
+VITE_API_URL=https://arkid-bk3nd.onrender.com
 ```
+
+---
+
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+---
+
+## API Endpoints
+
+All requests go to `VITE_API_URL`.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/card/:username` | Fetch card by username |
+| `GET` | `/api/card/user/cards` | Get authenticated user's cards |
+| `POST` | `/api/card/activate` | Activate a card |
+| `PUT` | `/api/card/:cardId/redirect` | Update redirect URL |
+| `POST` | `/api/orders` | Create a new order |
+| `POST` | `/api/discount/validate` | Validate a discount code |
+
+Authentication is handled via **Privy** — JWT bearer tokens are attached to protected requests automatically.
+
+---
+
+## Pricing (Nigeria)
+
+| Item | Price |
+|------|-------|
+| NFC Card | NGN 25,000 |
+| Delivery (within Lagos) | NGN 4,500 |
+| Delivery (outside Lagos) | NGN 7,000 |
