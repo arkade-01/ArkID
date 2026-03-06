@@ -24,7 +24,7 @@ const PersonalLinks = ({ platform, url }: links) => {
         alt=""
         className="w-8 h-8 grayscale"
       />
-      <p>{platform}</p>
+      <p>{url}</p>
       <EllipsisVertical />
     </a>
   );
