@@ -85,7 +85,7 @@ export const Profile = () => {
         {allInfo
           ? allInfo.data.social_links.map((item: any, i: number) =>
               item.visible === true ? (
-                <PersonalLinks key={i} platform="hi" url="hi" />
+                <PersonalLinks key={i} platform={item.platform} url={item.url} />
               ) : (
                 null
               ),

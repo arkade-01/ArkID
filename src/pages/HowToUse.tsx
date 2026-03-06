@@ -6,6 +6,7 @@ import ios1 from "../assets/ios1.svg";
 import { ChevronLeft } from "lucide-react";
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { NewNavBar } from "../components/NewNavBar";
 
 type display = {
   img: string;
@@ -90,6 +91,7 @@ export const HowToUse = () => {
 
   return (
     <main className="p-5">
+      <NewNavBar />
       <h1 className="text-center text-4xl font-black mt-9">
         Ready to use your card?
       </h1>

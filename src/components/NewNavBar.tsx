@@ -19,9 +19,9 @@ export const NewNavBar = () => {
         <div>
             <Menu className="cursor-pointer" onClick={() => setOpen((prev) => !prev)} />
               {open && (
-                <nav className="border absolute right-7 bg-white [&>p]:text-right [&>p]:py-2 p-2 rounded-lg ">
+                <nav className="border absolute right-7 bg-white [&>p]:text-right [&>p]:py-2 p-3 rounded-lg">
                   <p onClick={() => linkFunction('/')}>Home</p>
-                  <p onClick={() => linkFunction('/')}>How it Works</p>
+                  <p onClick={() => linkFunction('/how_to_use')}>How it Works</p>
                   <p onClick={() => linkFunction('/')}>Pricing/Shop</p>
                   <p onClick={() => linkFunction('/')}>Sign Up/Login In</p>
                   <p onClick={() => linkFunction('/')}>Contact Us</p>
