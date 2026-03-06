@@ -24,7 +24,7 @@ const PersonalLinks = ({ platform, url }: links) => {
         alt=""
         className="w-8 h-8 grayscale"
       />
-      <p>random link way</p>
+      <p>{platform}</p>
       <EllipsisVertical />
     </a>
   );
@@ -63,7 +63,7 @@ export const Profile = () => {
               : "https://placehold.co/150x150"
           }
           alt="profile photo"
-          className="h-37.5 w-37.5 rounded-full mx-auto"
+          className="h-37.5 w-37.5 rounded-full mx-auto object-cover"
         />
         <h4 className="text-center font-bold text-3xl">
           {allInfo ? allInfo.data.display_name : "John Doe"}
