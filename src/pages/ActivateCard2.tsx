@@ -2,6 +2,7 @@ import { Mail } from "lucide-react";
 import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import useCard from "../hook/card/useCard";
+import { NewNavBar } from "../components/NewNavBar";
 
 type form = {
   cardId: string;
@@ -27,6 +28,7 @@ export const ActivateCard2 = () => {
 
   return (
     <main className="bg-white p-7">
+      <NewNavBar />
       <h1 className="mx-auto w-fit mb-5 text-4xl font-bold text-center">
         Activate Your Card
       </h1>

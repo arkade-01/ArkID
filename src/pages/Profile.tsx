@@ -24,7 +24,7 @@ const PersonalLinks = ({ platform, url }: links) => {
         alt=""
         className="w-8 h-8 grayscale"
       />
-      <p>{url}</p>
+      <p>{platform}</p>
       <EllipsisVertical />
     </a>
   );
@@ -66,12 +66,12 @@ export const Profile = () => {
           className="h-37.5 w-37.5 rounded-full mx-auto object-cover"
         />
         <h4 className="text-center font-bold text-3xl">
-          {allInfo ? allInfo.data.display_name : "John Doe"}
+          {allInfo ? allInfo.data.display_name : "Loading..."}
         </h4>
         <p className="text-center text-fadetext">
           {allInfo
             ? allInfo.data.bio
-            : "Creative Director & Photographer | Helping brands tell their story through visual content | Based in Lagos 🇳🇬"}
+            : " "}
         </p>
         <button
           className="flex gap-3 border border-fadetext rounded-full p-4 mx-auto"
@@ -81,7 +81,7 @@ export const Profile = () => {
         </button>
       </section>
 
-      <section className="space-y-5">
+      <section className="space-y-5"> 
         {allInfo
           ? allInfo.data.social_links.map((item: any, i: number) =>
               item.visible === true ? (
@@ -90,7 +90,7 @@ export const Profile = () => {
                 null
               ),
             )
-          : "Social Links loading...."}
+          : "No Social links yet..."}
       </section>
     </main>
   );
