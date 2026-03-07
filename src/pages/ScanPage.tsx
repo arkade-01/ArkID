@@ -1,20 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { usePrivy } from "@privy-io/react-auth";
-import { getCard } from "../services/api/getCard";
+import { getCardStatus } from "../services/api/getCardStatus";
 import Preloader from "../components/Preloader";
-
-interface CardData {
-  username: string;
-  isActivated: boolean;
-  redirect_url: string | null;
-  taps_count: number;
-}
-
-interface ApiResponse {
-  success: boolean;
-  data: CardData;
-}
 
 const ScanPage = () => {
   const { username } = useParams<{ username: string }>();
@@ -38,42 +26,26 @@ const ScanPage = () => {
       }
 
       try {
-        console.log('Checking card for username:', username);
-        const response: ApiResponse = await getCard(username);
-        console.log('Card API response:', response);
+        const response = await getCardStatus(username);
         
         if (response.success) {
           const data = response.data;
 
-          // If card is activated and has a redirect URL, redirect to it
-          if (data.isActivated && data.redirect_url) {
-            window.location.href = data.redirect_url;
+          // If card is activated, go to the user's profile page
+          if (data.isActivated) {
+            navigate(`/profile/${data.username}`);
             return;
           }
 
-          // Otherwise, navigate to dashboard with the card data
-          // User can view and update redirect link from dashboard
-          if (authenticated) {
-            navigate("/dashboard", { state: { scannedCardData: data } });
-          } else {
-            // If not authenticated, prompt to login first
-            navigate("/not-activated", { state: { cardData: data, needsAuth: true } });
-          }
+          // Not activated — prompt to activate
+          navigate("/not-activated", { state: { cardData: data, needsAuth: !authenticated } });
         } else {
-          // Handle card not found - show not-activated page with username
-          console.log('Card not found, redirecting to not-activated page');
-          const cardData = {
-            username: username,
-            isActivated: false,
-            redirect_url: null,
-            taps_count: 0
-          };
-          navigate("/not-activated", { 
-            state: { 
-              cardData: cardData, 
+          navigate("/not-activated", {
+            state: {
+              cardData: { username, isActivated: false },
               needsAuth: !authenticated,
-              cardNotFound: true 
-            } 
+              cardNotFound: true,
+            },
           });
         }
       } catch (err) {

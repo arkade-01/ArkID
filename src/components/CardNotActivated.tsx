@@ -5,8 +5,6 @@ import { useState, useEffect, useRef } from "react";
 interface CardData {
   username: string;
   isActivated: boolean;
-  redirect_url: string | null;
-  taps_count: number;
 }
 
 const CardNotActivated = () => {
