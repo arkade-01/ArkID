@@ -41,20 +41,16 @@ export const useEditProfile = () => {
   };
 
   const mainProfile = async (name: string) => {
-    let id: string | number | undefined;
     try {
-      id = toast.loading("Please wait this profile is loading");
       const res = await noAuth.get(`/api/card/${name}`);
-      toast.success("Information ready", { id });
-
       return res.data;
     } catch (err: any) {
       if (err.response) {
-        toast.error(`${err?.response?.data?.message}`, { id }); // server responded with an error
+        toast.error(`${err?.response?.data?.message}`);
       } else {
-        toast.error(`${err?.message}`, { id }); // no response at all
+        toast.error(`${err?.message}`);
       }
-      navigate('/')
+      navigate('/');
     }
   };
 
