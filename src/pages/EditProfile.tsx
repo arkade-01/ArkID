@@ -42,79 +42,49 @@ const Socials = ({
     { value: "substack", label: "Substack" },
   ];
 
-  const [selected, setSelected] = useState<{
-    value: string;
-    label: string;
-  } | null>(null); //editing platform
-  const [link, setLink] = useState("");
-  const [plat, setPlat] = useState<any>(); //from api platform
-  const [visible, setVisible] = useState<boolean>(false); //manage visible
-
-  //inital platform set
-  const inital = (input: string) => {
-    if (plat) {
-      setPlat({
-        value: input,
-        label: input.charAt(0).toUpperCase() + input.slice(1).toLowerCase(),
-      });
-    }
-  };
-
-  //initail useffect
-  useEffect(() => {
-    inital(platform);
-    setLink(url);
-    setVisible(visibility);
-    console.log(visibility);
-  }, [platform, url]);
-
-  //on any change/editing of information useEffect
-  useEffect(() => {
-    update(index, {
-      platform: selected?.value,
-      url: link,
-      visible: visible,
-    });
-  }, [selected, link, visible]);
+  const currentOption = platform
+    ? {
+        value: platform.toLowerCase(),
+        label: platform.charAt(0).toUpperCase() + platform.slice(1).toLowerCase(),
+      }
+    : null;
 
   return (
     <section className="space-y-6 bg-[#F9FAFB] p-5 border border-[#A0ABC0] rounded-xl">
       <div className="flex gap-3 items-center">
         <img
           src={
-            selected
-              ? `https://logos.hunter.io/${selected.label}.com`
-              : plat
-                ? `https://logos.hunter.io/${plat.label}.com`
-                : `https://placehold.co/10x10`
+            currentOption
+              ? `https://logos.hunter.io/${currentOption.label}.com`
+              : `https://placehold.co/10x10`
           }
           alt=""
           className="h-9"
         />
         <Select
           options={options}
-          value={selected ?? plat}
-          onChange={setSelected}
+          value={options.find(o => o.value === currentOption?.value) || currentOption}
+          onChange={(selected: any) => update(index, { platform: selected?.value })}
           className="w-full"
         />
       </div>
 
       <input
         type="text"
-        value={link ?? url}
-        onChange={(e) => setLink(e.target.value)}
+        value={url || ""}
+        onChange={(e) => update(index, { url: e.target.value })}
         placeholder="link to your profile"
         className="p-5 border h-10 w-full bg-white rounded-md"
       />
 
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center">
         <div
-          className={`border p-1 px-3 ${visible ? "text-[#008B5D] bg-[#BCFFE9]" : "bg-[#EDF0F7] text-fadetext"}`}
-          onClick={() => setVisible((prev) => !prev)}
+          className={`border p-1 px-3 cursor-pointer rounded-md transition-colors ${visibility ? "text-[#008B5D] bg-[#BCFFE9]" : "bg-[#EDF0F7] text-fadetext"}`}
+          onClick={() => update(index, { visible: !visibility })}
         >
-          {visible ? "visible" : "Hidden"}
+          {visibility ? "Visible" : "Hidden"}
         </div>
-        <Trash color="#717D96" onClick={onDelete} />
+        <Trash className="cursor-pointer hover:text-red-500 transition-colors" color="#717D96" onClick={onDelete} />
       </div>
     </section>
   );
@@ -179,10 +149,10 @@ export const EditProfile = () => {
     e.preventDefault();
     const myform = new FormData();
 
-    //check for image
+    //check for image - only require if no existing API image
     if (image) {
       myform.append("image", image);
-    } else {
+    } else if (!apiImage) {
       toast.error("no image selected");
       return;
     }
@@ -218,13 +188,14 @@ export const EditProfile = () => {
   useEffect(() => {
     const initial = async () => {
       const res = await getProfile();
+      const cardData = res?.data?.[0] || res; // handle both { data: [card] } and direct card response
 
-      setTextlength(res?.bio); //bio
-      setName(res?.display_name); //dispplay name
-      res?.social_links
-        ? setSocialArray(res?.social_links)
+      setTextlength(cardData?.bio || ""); //bio
+      setName(cardData?.display_name || ""); //display name
+      cardData?.social_links
+        ? setSocialArray(cardData.social_links)
         : setSocialArray([]); //social links
-      setApiImage(res?.profile_photo); //profile photo
+      setApiImage(cardData?.profile_photo || null); //profile photo
     };
 
     initial();

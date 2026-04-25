@@ -1,23 +1,16 @@
 interface StatCard {
-  icon: string;
+  icon?: string;
   label: string;
   value: string;
 }
 
-const StatCard = ({ icon, label, value }: StatCard) => {
+const StatCard = ({ label, value }: StatCard) => {
   return (
-    <div className="flex flex-1 flex-col gap-4 rounded-lg bg-[#202022] p-6">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#D4AF37]">
-          <img src={icon} alt="icon" className="h-5 w-5" />
-        </div>
-
-        <p className="text-[12px] font-bold uppercase tracking-wider text-[#A1A1AA]">
-          {label}
-        </p>
-      </div>
-
-      <h2 className="text-[40px] font-bold leading-none text-white">{value}</h2>
+    <div className="flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-6">
+      <h2 className="text-[40px] font-bold leading-none text-[#1E2A3A]">{value}</h2>
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-[#717D96]">
+        {label}
+      </p>
     </div>
   );
 };

@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useNavigate, useLocation } from "react-router-dom";
-import ProfileForm from "../components/ProfileForm";
-import RedirectSection from "../components/RedirectSection";
 import StatCard from "../components/StatCard";
+import SocialLinkItem from "../components/SocialLinkItem";
 import { getUserCards } from "../services/api/getUserCards";
+
+interface SocialLink {
+  platform: string;
+  url: string;
+  visible: boolean;
+  order?: number;
+  _id?: string;
+}
 
 interface UserCard {
   card_id: string;
@@ -12,9 +19,14 @@ interface UserCard {
   username: string;
   email: string;
   isActivated: boolean;
-  redirect_url: string | null;
+  display_name?: string;
+  bio?: string;
+  profile_photo?: string;
+  social_links?: SocialLink[];
+  redirect_url?: string | null;
   taps_count: number;
-  valid_redirects_count: number;
+  profile_views?: number;
+  valid_redirects_count?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -25,14 +37,15 @@ interface ApiResponse {
 }
 
 const Dashboard = () => {
-  const { authenticated, ready, logout, user } = usePrivy();
+  const { authenticated, ready, logout } = usePrivy();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userCards, setUserCards] = useState<UserCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+  const [cardEnabled, setCardEnabled] = useState(true);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+
   // Get scanned card data from navigation state
   const scannedCardData = location.state?.scannedCardData;
 
@@ -44,32 +57,39 @@ const Dashboard = () => {
 
     const fetchUserCards = async () => {
       if (!authenticated) return;
-      
+
       try {
         // If scanned card data is available, use it instead of fetching
         if (scannedCardData) {
           console.log('Using scanned card data:', scannedCardData);
-          // Convert scanned card data to UserCard format
           const cardData: UserCard = {
-            card_id: '', // Not provided in scan response
-            user_id: '', // Not provided in scan response
+            card_id: '',
+            user_id: '',
             username: scannedCardData.username,
-            email: '', // Not provided in scan response
+            email: '',
             isActivated: scannedCardData.isActivated,
             redirect_url: scannedCardData.redirect_url,
             taps_count: scannedCardData.taps_count,
-            valid_redirects_count: 0, // Not provided in scan response
-            createdAt: '', // Not provided in scan response
-            updatedAt: '', // Not provided in scan response
+            profile_views: 0,
+            createdAt: '',
+            updatedAt: '',
           };
           setUserCards([cardData]);
+          setCardEnabled(cardData.isActivated);
           setLoading(false);
           return;
         }
-        
+
         const response: ApiResponse = await getUserCards();
         if (response.success) {
           setUserCards(response.data);
+          const card = response.data[0];
+          if (card) {
+            setCardEnabled(card.isActivated);
+            if (card.social_links) {
+              setSocialLinks(card.social_links);
+            }
+          }
         } else {
           setError("Failed to load cards");
         }
@@ -91,11 +111,49 @@ const Dashboard = () => {
     navigate("/");
   };
 
-  const currentCard = userCards[0]; // Assuming user has one card
+  const currentCard = userCards[0];
+
+  // Social platform icon components
+  const SocialIcon = ({ platform }: { platform: string }) => {
+    switch (platform.toLowerCase()) {
+      case "linkedin":
+        return (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#1E2A3A">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+          </svg>
+        );
+      case "instagram":
+        return (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#1E2A3A">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+          </svg>
+        );
+      case "twitter":
+      case "x":
+        return (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#1E2A3A">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+          </svg>
+        );
+      case "youtube":
+        return (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#1E2A3A">
+            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+          </svg>
+        );
+      default:
+        return (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E2A3A" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+          </svg>
+        );
+    }
+  };
 
   if (!ready || loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <img src="/Logo (2).png" alt="Loading..." className="animate-pulse" />
       </div>
     );
@@ -103,12 +161,12 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen bg-white text-[#1E2A3A] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-400">{error}</p>
-          <button 
+          <p className="text-red-500">{error}</p>
+          <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-6 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c29f2f]"
+            className="mt-4 px-6 py-2 bg-[#D4AF37] text-white rounded-xl hover:bg-[#c29f2f] font-semibold transition-colors"
           >
             Retry
           </button>
@@ -117,159 +175,155 @@ const Dashboard = () => {
     );
   }
 
+  // Get unique visible social platforms for the icon row under username
+  const visiblePlatforms = socialLinks
+    .filter((link) => link.visible)
+    .map((link) => link.platform.toLowerCase())
+    .filter((value, index, self) => self.indexOf(value) === index)
+    .slice(0, 4);
+
   return (
-    <div className="min-h-screen bg-black relative">
-      {/* Hamburger Menu Button */}
-      <button
-        onClick={() => setIsMenuOpen(true)}
-        className="fixed top-4 left-4 z-50 p-3 text-white hover:bg-gray-800 rounded-lg"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-md px-5 pb-10">
+        {/* Logo */}
+        <div className="pt-6 pb-2">
+          <img src="/ArkID logob.png" alt="ArkID Logo" className="h-8 w-auto" />
+        </div>
 
-      {/* Sliding Menu */}
-      <div
-        className={`fixed inset-0 z-40 transition-opacity duration-300 ${
-          isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        {/* Backdrop with blur */}
-        <div 
-          className={`absolute inset-0 backdrop-blur-sm bg-black/50 transition-all duration-300`}
-          onClick={() => setIsMenuOpen(false)}
-        />
-        
-        {/* Menu Panel */}
-        <div
-          className={`absolute left-0 top-0 h-full w-80 bg-[#1a1a1a] shadow-xl transform transition-transform duration-300 ease-in-out ${
-            isMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-        >
-          <div className="p-6">
-            {/* Close Button */}
-            <button
-              onClick={() => setIsMenuOpen(false)}
-              className="absolute top-4 right-4 p-2 text-white hover:bg-gray-700 rounded-lg"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+        {/* Dashboard Title */}
+        <h1 className="text-[22px] font-bold text-[#1E2A3A] mb-5">Dashboard</h1>
 
-            {/* Logo */}
-            <div className="mb-8 mt-4">
-              <img src="/ArkID logo-1.png" alt="ArkID Logo" className="h-8 w-auto" />
-            </div>
-
-            {/* User Info */}
-            <div className="mb-8 pb-6 border-b border-gray-700">
-              <p className="text-white text-lg font-semibold">
-                {user?.email?.address || "User"}
-              </p>
-              <p className="text-gray-400 text-sm">
-                {currentCard?.username ? `@${currentCard.username}` : "No cards"}
-              </p>
-            </div>
-
-            {/* Menu Items */}
-            <nav className="space-y-4">
-              <button
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  // Navigate to dashboard (already here)
+        {/* Profile Section */}
+        <div className="flex items-center gap-4 mb-7">
+          {/* Avatar with gold ring */}
+          <div className="relative flex-shrink-0">
+            <div className="w-[72px] h-[72px] rounded-full border-[3px] border-[#D4AF37] overflow-hidden bg-gray-100">
+              <img
+                src={currentCard?.profile_photo || "/profile-placeholder.jpg"}
+                alt="Profile"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentCard?.username || "User")}&size=200&background=D4AF37&color=fff`;
                 }}
-                className="w-full text-left px-4 py-3 text-white hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                Dashboard
-              </button>
+              />
+            </div>
+          </div>
+
+          {/* Username + social icons */}
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-[16px] font-semibold text-[#1E2A3A]">
+                  @{currentCard?.username || "username"}
+                </h2>
+                {/* Social platform icons */}
+                <div className="flex items-center gap-2.5 mt-1.5">
+                  {visiblePlatforms.length > 0 ? (
+                    visiblePlatforms.map((platform) => (
+                      <SocialIcon key={platform} platform={platform} />
+                    ))
+                  ) : (
+                    <>
+                      <SocialIcon platform="linkedin" />
+                      <SocialIcon platform="instagram" />
+                      <SocialIcon platform="x" />
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Edit Profile link */}
               <button
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  navigate("/activate");
-                }}
-                className="w-full text-left px-4 py-3 text-white hover:bg-gray-700 rounded-lg transition-colors"
+                onClick={() => navigate("/edit-profile")}
+                className="text-[13px] font-medium text-[#3B5998] hover:text-[#2d4373] transition-colors"
               >
-                Activate New Card
+                Edit Profile
               </button>
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-4 py-3 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
-              >
-                Logout
-              </button>
-            </nav>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mx-auto max-w-6xl">
-        {/* Header with gradient background and profile */}
-        <div className="relative">
-          {/* Gradient Header Background */}
-          <div className="h-48 md:h-64 w-full overflow-hidden rounded-b-3xl md:rounded-b-4xl">
-            <img 
-              src="/header-gradient.svg" 
-              alt="Header Background" 
-              className="h-full w-full object-cover"
-            />
+        {/* Stats Cards */}
+        <div className="flex gap-3 mb-8">
+          <StatCard
+            label="TOTAL TAPS"
+            value={currentCard?.taps_count?.toString() || "0"}
+          />
+          <StatCard
+            label="PROFILE VIEWS"
+            value={currentCard?.profile_views?.toString() || "0"}
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-[#E5E7EB] mb-6" />
+
+        {/* Card Settings */}
+        <div className="mb-8">
+          <h3 className="text-[16px] font-semibold text-[#1E2A3A] mb-4">Card Settings</h3>
+          <div className="flex items-center justify-between rounded-2xl border border-[#E5E7EB] bg-white px-5 py-4">
+            <span className="text-[15px] font-medium text-[#1E2A3A]">Card Status</span>
+            <div className="flex items-center gap-3">
+              <span className="text-[13px] text-[#717D96]">
+                {cardEnabled ? "Enabled" : "Disabled"}
+              </span>
+              <button
+                onClick={() => setCardEnabled(!cardEnabled)}
+                className={`relative h-[28px] w-[50px] rounded-full transition-colors duration-200 ${
+                  cardEnabled ? "bg-[#1E2A3A]" : "bg-[#D1D5DB]"
+                }`}
+                aria-label="Toggle card status"
+              >
+                <span
+                  className={`absolute top-[3px] left-[3px] h-[22px] w-[22px] rounded-full bg-white transition-transform duration-200 shadow-sm ${
+                    cardEnabled ? "translate-x-[22px]" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
           </div>
-          
-          {/* Profile Picture - Overlays the header */}
-          <div className="absolute left-1/2 -translate-x-1/2 -bottom-16 md:-bottom-20">
-            <div className="relative">
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-[#D4AF37] overflow-hidden bg-gray-200">
-                <img 
-                  src="/profile-placeholder.jpg" 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentCard?.username || "User")}&size=200&background=D4AF37&color=000`;
+        </div>
+
+        {/* Social Links */}
+        <div className="mb-8">
+          <h3 className="text-[16px] font-semibold text-[#1E2A3A] mb-4">Social Links</h3>
+          <div className="space-y-3">
+            {socialLinks.length > 0 ? (
+              socialLinks.map((link, index) => (
+                <SocialLinkItem
+                  key={link._id || index}
+                  platform={link.platform}
+                  url={link.url}
+                  visible={link.visible}
+                  onEdit={() => navigate("/edit-profile")}
+                  onToggle={(visible) => {
+                    const updated = [...socialLinks];
+                    updated[index] = { ...updated[index], visible };
+                    setSocialLinks(updated);
                   }}
                 />
+              ))
+            ) : (
+              <div className="rounded-2xl border border-dashed border-[#D1D5DB] bg-[#F9FAFB] px-5 py-8 text-center">
+                <p className="text-[14px] text-[#717D96] mb-3">No social links added yet</p>
+                <button
+                  onClick={() => navigate("/edit-profile")}
+                  className="text-[13px] font-semibold text-[#D4AF37] hover:text-[#b8952b] transition-colors"
+                >
+                  + Add Social Links
+                </button>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Username and Status */}
-        <div className="mt-20 md:mt-24 px-3 md:px-6 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
-            @{currentCard?.username || "No username"}
-          </h1>
-          <div className={`inline-flex rounded-full px-4 py-1.5 text-sm font-bold ${
-            currentCard?.isActivated 
-              ? "bg-[#B4FFE6] text-[#10B981]" 
-              : "bg-[#FEE2E2] text-[#EF4444]"
-          }`}>
-            <span className={`mr-2 inline-block h-2 w-2 rounded-full ${
-              currentCard?.isActivated ? "bg-[#10B981]" : "bg-[#EF4444]"
-            }`}></span>
-            {currentCard?.isActivated ? "Active" : "Inactive"}
-          </div>
-        </div>
-
-        {/* Stats and Content */}
-        <div className="mt-8 px-3 md:px-6 space-y-6 pb-8">
-          <div className="flex flex-row gap-4">
-            <StatCard 
-              icon="/tap-one.svg" 
-              label="TOTAL TAPS" 
-              value={currentCard?.taps_count?.toString() || "0"} 
-            />
-            <StatCard
-              icon="/tick-one.svg"
-              label="VALID REDIRECTS"
-              value={currentCard?.valid_redirects_count?.toString() || "0"}
-            />
-          </div>
-
-          <div className="rounded-lg bg-[#202022] p-6 md:p-8">
-            <RedirectSection currentUrl={currentCard?.redirect_url} />
-            <ProfileForm userCard={currentCard} />
-          </div>
-        </div>
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="w-full rounded-2xl border border-[#E5E7EB] bg-white px-5 py-4 text-[15px] font-medium text-red-500 hover:bg-red-50 transition-colors"
+        >
+          Log Out
+        </button>
       </div>
     </div>
   );
