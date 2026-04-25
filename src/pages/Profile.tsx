@@ -2,8 +2,9 @@ import { EllipsisVertical } from "lucide-react";
 import { Share2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useEditProfile } from "../hook/profile/useEditProfile";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { usePrivy } from "@privy-io/react-auth";
 
 type links = {
   platform: string;
@@ -36,8 +37,12 @@ export const Profile = () => {
   const { mainProfile } = useEditProfile();
   const { name } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { login, authenticated } = usePrivy();
+  
   const [allInfo, setAllInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [clickedEdit, setClickedEdit] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -50,10 +55,30 @@ export const Profile = () => {
     fetch();
   }, []);
 
+  useEffect(() => {
+    // Redirect to dashboard after successful login if they clicked Edit Profile
+    if (authenticated && clickedEdit) {
+      navigate('/dashboard');
+    }
+  }, [authenticated, clickedEdit, navigate]);
+
   const copyToClipboard = async (text: string) => {
     await navigator.clipboard.writeText(text);
     toast("copied to clipboard");
   };
+
+  const handleEditProfile = () => {
+    if (authenticated) {
+      navigate('/dashboard');
+    } else {
+      setClickedEdit(true);
+      login();
+    }
+  };
+
+  const isEmpty = allInfo?.data && 
+                  !allInfo.data.bio && 
+                  (!allInfo.data.social_links || allInfo.data.social_links.length === 0);
 
   return (
     <main className="p-7">
@@ -63,7 +88,7 @@ export const Profile = () => {
           <Skeleton className="h-37.5 w-37.5 rounded-full mx-auto" />
         ) : (
           <img
-            src={allInfo?.data.profile_photo}
+            src={allInfo?.data.profile_photo || "/profile-placeholder.jpg"}
             alt="profile photo"
             className="h-37.5 w-37.5 rounded-full mx-auto object-cover"
           />
@@ -73,7 +98,7 @@ export const Profile = () => {
           <Skeleton className="h-8 w-48 mx-auto rounded-lg" />
         ) : (
           <h4 className="text-center font-bold text-3xl">
-            {allInfo?.data.display_name}
+            {allInfo?.data.display_name || `@${name}`}
           </h4>
         )}
 
@@ -83,15 +108,17 @@ export const Profile = () => {
             <Skeleton className="h-4 w-48 mx-auto rounded" />
           </div>
         ) : (
-          <p className="text-center text-fadetext">{allInfo?.data.bio}</p>
+          allInfo?.data.bio && <p className="text-center text-fadetext">{allInfo?.data.bio}</p>
         )}
 
-        <button
-          className="flex gap-3 border border-fadetext rounded-full p-4 mx-auto"
-          onClick={() => copyToClipboard(location.pathname)}
-        >
-          <Share2 /> Share Profile
-        </button>
+        {!isEmpty && (
+          <button
+            className="flex gap-3 border border-fadetext rounded-full p-4 mx-auto"
+            onClick={() => copyToClipboard(location.pathname)}
+          >
+            <Share2 /> Share Profile
+          </button>
+        )}
       </section>
 
       <section className="space-y-5">
@@ -101,8 +128,18 @@ export const Profile = () => {
             <Skeleton className="h-14 w-full" />
             <Skeleton className="h-14 w-full" />
           </>
+        ) : isEmpty ? (
+          <div className="text-center mt-10">
+            <p className="text-lg font-semibold text-gray-700 mb-6">Your profile looks empty</p>
+            <button
+              onClick={handleEditProfile}
+              className="bg-[#D4AF37] px-8 py-4 rounded-xl text-black font-semibold text-[15px] shadow-sm hover:bg-[#c29f2f] transition-colors"
+            >
+              Edit Profile
+            </button>
+          </div>
         ) : (
-          allInfo?.data.social_links.map((item: any, i: number) =>
+          allInfo?.data.social_links?.map((item: any, i: number) =>
             item.visible === true ? (
               <PersonalLinks key={i} platform={item.platform} url={item.url} />
             ) : null
