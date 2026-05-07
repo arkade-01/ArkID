@@ -1,5 +1,4 @@
-import { EllipsisVertical } from "lucide-react";
-import { Share2 } from "lucide-react";
+import { EllipsisVertical, Share2, Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useEditProfile } from "../hook/profile/useEditProfile";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
@@ -82,7 +81,16 @@ export const Profile = () => {
 
   return (
     <main className="p-7">
-      <img src="/ArkID logob.png" alt="" className="h-7.5 mb-5" />
+      <div className="flex items-center justify-between mb-5">
+        <img src="/ArkID logob.png" alt="" className="h-7.5" />
+        <button
+          onClick={handleEditProfile}
+          title="Edit Profile"
+          className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+        >
+          <Pencil size={16} />
+        </button>
+      </div>
       <section className="mb-15 space-y-4">
         {loading ? (
           <Skeleton className="h-37.5 w-37.5 rounded-full mx-auto" />
