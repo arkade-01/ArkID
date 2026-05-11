@@ -85,10 +85,10 @@ export const Profile = () => {
         <img src="/ArkID logob.png" alt="" className="h-7.5" />
         <button
           onClick={handleEditProfile}
-          title="Edit Profile"
-          className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          className="flex items-center gap-1.5 p-2 rounded-full text-xs text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
         >
-          <Pencil size={16} />
+          <Pencil size={14} />
+          <span>{authenticated ? "Edit profile" : "Login to edit profile"}</span>
         </button>
       </div>
       <section className="mb-15 space-y-4">
