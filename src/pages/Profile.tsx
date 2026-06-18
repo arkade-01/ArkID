@@ -11,10 +11,11 @@ type links = {
 };
 
 const PersonalLinks = ({ platform, url }: links) => {
+  const formattedUrl = url.match(/^https?:\/\//i) ? url : `https://${url}`;
   return (
     <a
       target="_blank"
-      href={url}
+      href={formattedUrl}
       className="flex justify-between items-center border border-fadetext rounded-xl p-3"
     >
       <img
