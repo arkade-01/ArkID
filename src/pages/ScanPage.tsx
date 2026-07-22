@@ -11,13 +11,6 @@ const ScanPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Debug environment variables
-  // console.log('ScanPage - Environment check:', {
-  //   VITE_API_URL: import.meta.env.VITE_API_URL,
-  //   VITE_PRIVY_APP_ID: import.meta.env.VITE_PRIVY_APP_ID,
-  //   username: username
-  // });
-
   useEffect(() => {
     const checkCard = async () => {
       if (!username) {
@@ -49,8 +42,6 @@ const ScanPage = () => {
           });
         }
       } catch (err) {
-        console.error("Error checking card:", err);
-        
         // Better error handling
         let errorMessage = "Failed to load card data";
         

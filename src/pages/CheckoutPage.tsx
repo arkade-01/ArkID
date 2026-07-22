@@ -1,10 +1,13 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { validateDiscount } from "../services/api/validateDiscount";
+import { checkUsernameAvailability } from "../services/api/checkUsernameAvailability";
+
+type UsernameStatus = "idle" | "checking" | "available" | "taken" | "error";
 
 const checkoutSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -29,6 +32,8 @@ const CheckoutPage = () => {
   const [appliedDiscount, setAppliedDiscount] = useState<{code: string; amount: number} | null>(null);
   const [discountError, setDiscountError] = useState<string | null>(null);
   const [applyingDiscount, setApplyingDiscount] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
+  const usernameAbortRef = useRef<AbortController | null>(null);
   const navigate = useNavigate();
 
   const {
@@ -44,6 +49,36 @@ const CheckoutPage = () => {
 
   const deliveryOption = watch("deliveryOption");
   const discountCode = watch("discountCode");
+  const username = watch("username");
+
+  useEffect(() => {
+    const trimmed = (username || "").trim();
+
+    if (!trimmed || errors.username) {
+      setUsernameStatus("idle");
+      return;
+    }
+
+    setUsernameStatus("checking");
+    const timer = setTimeout(async () => {
+      usernameAbortRef.current?.abort();
+      const controller = new AbortController();
+      usernameAbortRef.current = controller;
+
+      try {
+        const body = await checkUsernameAvailability(trimmed, controller.signal);
+        setUsernameStatus(body?.data?.available ? "available" : "taken");
+      } catch (error) {
+        if (axios.isCancel(error)) return;
+        setUsernameStatus("error");
+      }
+    }, 400);
+
+    return () => {
+      clearTimeout(timer);
+      usernameAbortRef.current?.abort();
+    };
+  }, [username, errors.username]);
   const basePrice = 25000;
   const deliveryFee = deliveryOption === "within-lagos" ? 4500 : deliveryOption === "outside-lagos" ? 7000 : 0;
   const discountAmount = appliedDiscount?.amount || 0;
@@ -61,11 +96,8 @@ const CheckoutPage = () => {
     setDiscountError(null);
 
     try {
-      console.log('Applying discount code:', code);
-
       // Call API to verify discount code
       const response = await validateDiscount(code);
-      console.log('Discount API response:', response);
 
       if (response && response.success) {
         // Calculate the full discount (base price + delivery fee = free order)
@@ -77,27 +109,17 @@ const CheckoutPage = () => {
           amount: fullDiscountAmount
         });
         setDiscountError(null);
-        console.log('Discount applied successfully:', fullDiscountAmount);
       } else {
         const errorMessage = response?.message || "Invalid discount code";
         setDiscountError(errorMessage);
         setAppliedDiscount(null);
-        console.log('Discount code invalid:', errorMessage);
       }
     } catch (error) {
       console.error("Discount verification failed:", error);
-
-      // More detailed error logging
-      if (error instanceof Error) {
-        console.error("Error message:", error.message);
-        console.error("Error stack:", error.stack);
-      }
-
       setDiscountError("Failed to verify discount code. Please try again.");
       setAppliedDiscount(null);
     } finally {
       setApplyingDiscount(false);
-      console.log('Discount application finished');
     }
   };
 
@@ -107,19 +129,15 @@ const CheckoutPage = () => {
   };
 
   const onSubmit = async (data: CheckoutFormData) => {
+    if (usernameStatus === "taken") {
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const deliveryFee = data.deliveryOption === "within-lagos" ? 4500 : 7000;
       const discountAmount = appliedDiscount?.amount || 0;
       const totalAmount = Math.max(0, 25000 + deliveryFee - discountAmount); // Ensure amount doesn't go negative
-
-      console.log('Order submission:', {
-        basePrice: 25000,
-        deliveryFee,
-        discountAmount,
-        totalAmount,
-        discountCode: appliedDiscount?.code
-      });
 
       const orderData = {
         ...data,
@@ -140,7 +158,6 @@ const CheckoutPage = () => {
         window.location.href = response.data.paymentUrl;
       } else {
         // No payment URL (free order with discount), redirect to payment callback
-        console.log('Order is free, redirecting to payment callback');
         navigate("/payment/callback", {
           state: {
             success: true,
@@ -150,7 +167,7 @@ const CheckoutPage = () => {
         });
       }
     } catch (error) {
-      console.error("Order failed:", error);
+      console.error("Order submission failed:", error);
       alert("Failed to process order. Please try again.");
     } finally {
       setIsProcessing(false);
@@ -338,15 +355,26 @@ const CheckoutPage = () => {
                     type="text"
                     id="username"
                     placeholder="john_doe"
+                    autoComplete="off"
                     className={`w-full rounded-lg border-2 bg-white px-4 py-3 text-gray-900 outline-none transition-all placeholder:text-gray-400 ${
-                      errors.username
+                      errors.username || usernameStatus === "taken"
                         ? "border-red-500 focus:border-red-500"
+                        : usernameStatus === "available"
+                        ? "border-green-500 focus:border-green-500"
                         : "border-gray-200 focus:border-[#d4af37]"
                     }`}
                   />
-                  {errors.username && (
+                  {errors.username ? (
                     <p className="pl-1 text-xs text-red-500">{errors.username.message}</p>
-                  )}
+                  ) : usernameStatus === "checking" ? (
+                    <p className="pl-1 text-xs text-gray-500">Checking availability...</p>
+                  ) : usernameStatus === "available" ? (
+                    <p className="pl-1 text-xs text-green-600">Username is available</p>
+                  ) : usernameStatus === "taken" ? (
+                    <p className="pl-1 text-xs text-red-500">Username is already taken</p>
+                  ) : usernameStatus === "error" ? (
+                    <p className="pl-1 text-xs text-gray-500">Couldn't check availability, please try again</p>
+                  ) : null}
                 </div>
 
                 <div className="grid gap-5 md:grid-cols-2">
@@ -578,11 +606,13 @@ const CheckoutPage = () => {
 
             <button
               type="submit"
-              disabled={isProcessing}
+              disabled={isProcessing || usernameStatus === "taken"}
               className="w-full transform rounded-lg bg-[#d4af37] py-4 text-base font-bold uppercase tracking-wide text-black transition-all hover:bg-[#c29f2f] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isProcessing ? (
                 "Processing..."
+              ) : usernameStatus === "taken" ? (
+                "Username Unavailable"
               ) : deliveryOption && appliedDiscount ? (
                 <span className="flex items-center justify-center gap-2">
                   <span>Complete Order & Pay</span>

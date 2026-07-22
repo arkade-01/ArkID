@@ -28,8 +28,7 @@ const RedirectSection = ({ currentUrl }: RedirectSectionProps) => {
       } else {
         setMessage({ text: response.message || "Failed to update redirect URL", type: 'error' });
       }
-    } catch (error) {
-      console.error("Error updating redirect URL:", error);
+    } catch {
       setMessage({ text: "Failed to update redirect URL", type: 'error' });
     } finally {
       setIsUpdating(false);

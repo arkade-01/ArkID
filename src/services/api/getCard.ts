@@ -10,10 +10,7 @@ export const getCard = async (username: string) => {
   const fullUrl = isDevelopment 
     ? `/api/card/${username}` 
     : `${import.meta.env.VITE_API_URL}/api/card/${username}`;
-  
-  console.log('Making request to:', fullUrl);
-  console.log('Environment:', { isDevelopment, VITE_API_URL: import.meta.env.VITE_API_URL });
-  
+
   try {
     const response = await axios.get(fullUrl, {
       timeout: 15000, // 15 second timeout
@@ -28,13 +25,7 @@ export const getCard = async (username: string) => {
         return status < 600; // Accept any status less than 600 (including 4xx and 5xx)
       }
     });
-    
-    console.log('Response received:', {
-      status: response.status,
-      statusText: response.statusText,
-      data: response.data
-    });
-    
+
     // If it's a 500 error but we got a response, treat it as a CORS/server issue
     if (response.status >= 500) {
       throw new Error(`Server error: ${response.status}. This might be a CORS issue.`);
@@ -52,21 +43,12 @@ export const getCard = async (username: string) => {
     return response.data;
     
   } catch (error) {
-    console.error('Request failed:', error);
-    
     if (axios.isAxiosError(error)) {
       if (error.code === 'ERR_NETWORK' || error.code === 'ECONNREFUSED') {
         throw new Error('Cannot connect to server. Please check your internet connection and try again.');
       } else if (error.code === 'ENOTFOUND') {
         throw new Error('Server not found. Please check the API URL.');
       } else if (error.response) {
-        // Server responded with error status
-        console.error('Response error:', {
-          status: error.response.status,
-          statusText: error.response.statusText,
-          data: error.response.data,
-        });
-        
         // Handle specific status codes
         if (error.response.status === 404) {
           return { success: false, message: "Card not found" };
@@ -77,11 +59,9 @@ export const getCard = async (username: string) => {
         }
       } else if (error.request) {
         // Request made but no response (likely CORS)
-        console.error('No response received:', error.request);
         throw new Error('No response from server. This is likely a CORS issue - the backend needs to allow requests from your domain.');
       } else {
         // Request setup error
-        console.error('Request setup error:', error.message);
         throw new Error(`Request setup error: ${error.message}`);
       }
     } else {

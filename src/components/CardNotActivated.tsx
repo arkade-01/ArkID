@@ -18,29 +18,23 @@ const CardNotActivated = () => {
   // Redirect to activate page after successful login
   useEffect(() => {
     if (authenticated && ready && loginTriggered.current) {
-      console.log('User authenticated after login, navigating to activate page');
       navigate("/activate", { state: { cardData } });
     }
   }, [authenticated, ready, navigate, cardData]);
 
   const handleActivate = () => {
-    console.log('Activate button clicked', { authenticated, ready, cardData });
-
     if (!ready) {
-      console.log('Privy not ready yet');
       return;
     }
 
     // If not authenticated, trigger login first
     if (!authenticated) {
-      console.log('User not authenticated, triggering login');
       loginTriggered.current = true;
       login();
       return;
     }
 
     // User is authenticated, navigate to activate page
-    console.log('Navigating to activate page with cardData:', cardData);
     navigate("/activate", { state: { cardData } });
   };
 
