@@ -22,7 +22,6 @@ export const ActivateCard2 = () => {
 
   //React hook form submitter function
   const OnSubmit: SubmitHandler<form> = async (data) => {
-    console.log(data);
     await activateCard(data.cardId);
   };
 

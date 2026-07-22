@@ -61,7 +61,6 @@ const Dashboard = () => {
       try {
         // If scanned card data is available, use it instead of fetching
         if (scannedCardData) {
-          console.log('Using scanned card data:', scannedCardData);
           const cardData: UserCard = {
             card_id: '',
             user_id: '',
@@ -93,8 +92,7 @@ const Dashboard = () => {
         } else {
           setError("Failed to load cards");
         }
-      } catch (err) {
-        console.error("Error fetching user cards:", err);
+      } catch {
         setError("Failed to load cards");
       } finally {
         setLoading(false);

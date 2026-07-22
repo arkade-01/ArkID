@@ -27,8 +27,6 @@ apis.interceptors.response.use(
       setTimeout(() => {
         window.location.href = "/";
       }, 1500);
-
-      console.error("API call failed:", error);
     }
     return Promise.reject(error);
   },

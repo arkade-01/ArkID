@@ -16,7 +16,6 @@ const PaymentCallback = () => {
 
       if (isFreeOrder && freeOrderSuccess) {
         // Free order with discount code - no payment needed
-        console.log('Free order detected, showing success');
         setStatus("success");
         setMessage("Order confirmed! Your discount code has been applied successfully.");
         return;
@@ -26,17 +25,12 @@ const PaymentCallback = () => {
       const currentPath = window.location.pathname;
 
       if (currentPath === "/payment/success") {
-        const reference = searchParams.get("reference");
-        const orderId = searchParams.get("order");
-        console.log('Payment successful:', { reference, orderId });
         setStatus("success");
         setMessage("Payment successful! Your order has been confirmed.");
         return;
       }
 
       if (currentPath === "/payment/failed") {
-        const reference = searchParams.get("reference");
-        console.log('Payment failed:', { reference });
         setStatus("failed");
         setMessage("Payment was not completed. Please try again or contact support.");
         return;
@@ -44,7 +38,6 @@ const PaymentCallback = () => {
 
       if (currentPath === "/payment/error") {
         const errorMessage = searchParams.get("message") || "An error occurred while processing your payment.";
-        console.log('Payment error:', errorMessage);
         setStatus("failed");
         setMessage(errorMessage);
         return;
