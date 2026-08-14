@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Camera } from "lucide-react";
 import { Trash } from "lucide-react";
 import { Plus } from "lucide-react";
+import { Mail } from "lucide-react";
 import Select from "react-select";
 import { useEditProfile } from "../hook/profile/useEditProfile";
 import { toast } from "sonner";
@@ -40,6 +41,8 @@ const Socials = ({
     { value: "pinterest", label: "Pinterest" },
     { value: "tiktok", label: "Tiktok" },
     { value: "substack", label: "Substack" },
+    { value: "whatsapp", label: "WhatsApp" },
+    { value: "email", label: "Email" },
   ];
 
   const currentOption = platform
@@ -52,15 +55,19 @@ const Socials = ({
   return (
     <section className="space-y-6 bg-[#F9FAFB] p-5 border border-[#A0ABC0] rounded-xl">
       <div className="flex gap-3 items-center">
-        <img
-          src={
-            currentOption
-              ? `https://logos.hunter.io/${currentOption.label}.com`
-              : `https://placehold.co/10x10`
-          }
-          alt=""
-          className="h-9"
-        />
+        {currentOption?.value === "email" ? (
+          <Mail className="h-9 w-9" color="#1E2A3A" />
+        ) : (
+          <img
+            src={
+              currentOption
+                ? `https://logos.hunter.io/${currentOption.label}.com`
+                : `https://placehold.co/10x10`
+            }
+            alt=""
+            className="h-9"
+          />
+        )}
         <Select
           options={options}
           value={options.find(o => o.value === currentOption?.value) || currentOption}
@@ -73,7 +80,13 @@ const Socials = ({
         type="text"
         value={url || ""}
         onChange={(e) => update(index, { url: e.target.value })}
-        placeholder="link to your profile"
+        placeholder={
+          currentOption?.value === "email"
+            ? "your@email.com"
+            : currentOption?.value === "whatsapp"
+              ? "phone number with country code e.g. +2348012345678"
+              : "link to your profile"
+        }
         className="p-5 border h-10 w-full bg-white rounded-md"
       />
 

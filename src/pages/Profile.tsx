@@ -1,4 +1,4 @@
-import { EllipsisVertical, Share2, Pencil } from "lucide-react";
+import { EllipsisVertical, Share2, Pencil, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useEditProfile } from "../hook/profile/useEditProfile";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
@@ -10,19 +10,34 @@ type links = {
   url: string;
 };
 
+const formatLinkUrl = (platform: string, url: string) => {
+  const key = platform.toLowerCase();
+  if (key === "email") {
+    return url.match(/^mailto:/i) ? url : `mailto:${url}`;
+  }
+  if (key === "whatsapp" && !url.match(/^https?:\/\//i)) {
+    return `https://wa.me/${url.replace(/\D/g, "")}`;
+  }
+  return url.match(/^https?:\/\//i) ? url : `https://${url}`;
+};
+
 const PersonalLinks = ({ platform, url }: links) => {
-  const formattedUrl = url.match(/^https?:\/\//i) ? url : `https://${url}`;
+  const isEmail = platform.toLowerCase() === "email";
   return (
     <a
       target="_blank"
-      href={formattedUrl}
+      href={formatLinkUrl(platform, url)}
       className="flex justify-between items-center border border-fadetext rounded-xl p-3"
     >
-      <img
-        src={`https://logos.hunter.io/${platform}.com`}
-        alt=""
-        className="w-8 h-8 grayscale"
-      />
+      {isEmail ? (
+        <Mail className="w-8 h-8" color="#717D96" />
+      ) : (
+        <img
+          src={`https://logos.hunter.io/${platform}.com`}
+          alt=""
+          className="w-8 h-8 grayscale"
+        />
+      )}
       <p>{platform}</p>
       <EllipsisVertical />
     </a>

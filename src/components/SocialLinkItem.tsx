@@ -19,6 +19,8 @@ const platformDisplayNames: Record<string, string> = {
   telegram: "Telegram",
   pinterest: "Pinterest",
   substack: "Substack",
+  whatsapp: "WhatsApp",
+  email: "Email",
 };
 
 const SocialLinkItem = ({ platform, url, visible, onToggle, onEdit }: SocialLinkItemProps) => {
