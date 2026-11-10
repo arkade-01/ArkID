@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Camera } from "lucide-react";
 import { Trash } from "lucide-react";
 import { Plus } from "lucide-react";
-import { Mail } from "lucide-react";
+import { Mail, Link as LinkIcon } from "lucide-react";
 import Select from "react-select";
 import { useEditProfile } from "../hook/profile/useEditProfile";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import { NewNavBar } from "../components/NewNavBar";
 type social = {
   platform: string;
   url: string;
+  title?: string;
   visibility: boolean;
   onDelete: () => void;
   update: (index: number, change: any) => void;
@@ -27,6 +28,7 @@ type social = {
 const Socials = ({
   platform,
   url,
+  title,
   visibility,
   onDelete,
   update,
@@ -43,6 +45,7 @@ const Socials = ({
     { value: "substack", label: "Substack" },
     { value: "whatsapp", label: "WhatsApp" },
     { value: "email", label: "Email" },
+    { value: "custom", label: "Custom Link" },
   ];
 
   const currentOption = platform
@@ -57,6 +60,8 @@ const Socials = ({
       <div className="flex gap-3 items-center">
         {currentOption?.value === "email" ? (
           <Mail className="h-9 w-9" color="#1E2A3A" />
+        ) : currentOption?.value === "custom" ? (
+          <LinkIcon className="h-9 w-9" color="#1E2A3A" />
         ) : (
           <img
             src={
@@ -76,6 +81,17 @@ const Socials = ({
         />
       </div>
 
+      {currentOption?.value === "custom" && (
+        <input
+          type="text"
+          value={title || ""}
+          onChange={(e) => update(index, { title: e.target.value })}
+          placeholder="link title e.g. My Portfolio"
+          maxLength={40}
+          className="p-5 border h-10 w-full bg-white rounded-md"
+        />
+      )}
+
       <input
         type="text"
         value={url || ""}
@@ -85,7 +101,9 @@ const Socials = ({
             ? "your@email.com"
             : currentOption?.value === "whatsapp"
               ? "phone number with country code e.g. +2348012345678"
-              : "link to your profile"
+              : currentOption?.value === "custom"
+                ? "https://your-link.com"
+                : "link to your profile"
         }
         className="p-5 border h-10 w-full bg-white rounded-md"
       />
@@ -183,6 +201,16 @@ export const EditProfile = () => {
       myform.append("display_name", name);
     } else {
       toast.error("Name field empty");
+      return;
+    }
+
+    //custom links need both a title and a url
+    const badCustom = socialArray.find(
+      (item) =>
+        item.platform === "custom" && (!item.title?.trim() || !item.url?.trim()),
+    );
+    if (badCustom) {
+      toast.error("Custom links need a title and a URL");
       return;
     }
 
@@ -291,6 +319,7 @@ export const EditProfile = () => {
                   key={i}
                   platform={item.platform}
                   url={item.url}
+                  title={item.title}
                   visibility={item.visible}
                   onDelete={() => deleteItem(i)}
                   update={updateItem}

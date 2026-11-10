@@ -8,6 +8,7 @@ import { getUserCards } from "../services/api/getUserCards";
 interface SocialLink {
   platform: string;
   url: string;
+  title?: string;
   visible: boolean;
   order?: number;
   _id?: string;
@@ -304,6 +305,7 @@ const Dashboard = () => {
                   key={link._id || index}
                   platform={link.platform}
                   url={link.url}
+                  title={link.title}
                   visible={link.visible}
                   onEdit={() => navigate("/edit-profile")}
                   onToggle={(visible) => {

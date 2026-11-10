@@ -3,6 +3,7 @@ import { useState } from "react";
 interface SocialLinkItemProps {
   platform: string;
   url: string;
+  title?: string;
   visible: boolean;
   onToggle?: (visible: boolean) => void;
   onEdit?: () => void;
@@ -21,9 +22,10 @@ const platformDisplayNames: Record<string, string> = {
   substack: "Substack",
   whatsapp: "WhatsApp",
   email: "Email",
+  custom: "Custom Link",
 };
 
-const SocialLinkItem = ({ platform, url, visible, onToggle, onEdit }: SocialLinkItemProps) => {
+const SocialLinkItem = ({ platform, url, title, visible, onToggle, onEdit }: SocialLinkItemProps) => {
   const [isEnabled, setIsEnabled] = useState(visible);
 
   const handleToggle = () => {
@@ -32,7 +34,10 @@ const SocialLinkItem = ({ platform, url, visible, onToggle, onEdit }: SocialLink
     onToggle?.(newValue);
   };
 
-  const displayName = platformDisplayNames[platform.toLowerCase()] || platform;
+  const displayName =
+    (platform.toLowerCase() === "custom" && title) ||
+    platformDisplayNames[platform.toLowerCase()] ||
+    platform;
 
   // Truncate URL for display
   const truncatedUrl = url.length > 22 ? url.substring(0, 22) + "..." : url;

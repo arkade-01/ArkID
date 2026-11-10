@@ -1,4 +1,4 @@
-import { EllipsisVertical, Share2, Pencil, Mail } from "lucide-react";
+import { EllipsisVertical, Share2, Pencil, Mail, Link as LinkIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useEditProfile } from "../hook/profile/useEditProfile";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
@@ -8,6 +8,7 @@ import { usePrivy } from "@privy-io/react-auth";
 type links = {
   platform: string;
   url: string;
+  title?: string;
 };
 
 const formatLinkUrl = (platform: string, url: string) => {
@@ -21,16 +22,20 @@ const formatLinkUrl = (platform: string, url: string) => {
   return url.match(/^https?:\/\//i) ? url : `https://${url}`;
 };
 
-const PersonalLinks = ({ platform, url }: links) => {
+const PersonalLinks = ({ platform, url, title }: links) => {
   const isEmail = platform.toLowerCase() === "email";
+  const isCustom = platform.toLowerCase() === "custom";
   return (
     <a
       target="_blank"
       href={formatLinkUrl(platform, url)}
+      rel="noopener noreferrer"
       className="flex justify-between items-center border border-fadetext rounded-xl p-3"
     >
       {isEmail ? (
         <Mail className="w-8 h-8" color="#717D96" />
+      ) : isCustom ? (
+        <LinkIcon className="w-8 h-8" color="#717D96" />
       ) : (
         <img
           src={`https://logos.hunter.io/${platform}.com`}
@@ -38,7 +43,7 @@ const PersonalLinks = ({ platform, url }: links) => {
           className="w-8 h-8 grayscale"
         />
       )}
-      <p>{platform}</p>
+      <p>{isCustom ? title || url : platform}</p>
       <EllipsisVertical />
     </a>
   );
@@ -165,7 +170,7 @@ export const Profile = () => {
         ) : (
           allInfo?.data.social_links?.map((item: any, i: number) =>
             item.visible === true ? (
-              <PersonalLinks key={i} platform={item.platform} url={item.url} />
+              <PersonalLinks key={i} platform={item.platform} url={item.url} title={item.title} />
             ) : null
           )
         )}
