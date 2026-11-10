@@ -2,7 +2,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Camera } from "lucide-react";
 import { Trash } from "lucide-react";
 import { Plus } from "lucide-react";
-import { Mail, Link as LinkIcon } from "lucide-react";
+import { Mail, Link as LinkIcon, GripVertical } from "lucide-react";
+import { Reorder, useDragControls } from "framer-motion";
 import Select from "react-select";
 import { useEditProfile } from "../hook/profile/useEditProfile";
 import { toast } from "sonner";
@@ -14,7 +15,11 @@ import { NewNavBar } from "../components/NewNavBar";
 //   social_links?: Array<any>;
 // };
 
+//client-only stable key so drag reordering keeps each card's identity
+const newKey = () => Math.random().toString(36).slice(2);
+
 type social = {
+  item: any;
   platform: string;
   url: string;
   title?: string;
@@ -26,6 +31,7 @@ type social = {
 
 //component for social
 const Socials = ({
+  item,
   platform,
   url,
   title,
@@ -55,9 +61,25 @@ const Socials = ({
       }
     : null;
 
+  const dragControls = useDragControls();
+
   return (
-    <section className="space-y-6 bg-[#F9FAFB] p-5 border border-[#A0ABC0] rounded-xl">
+    <Reorder.Item
+      as="section"
+      value={item}
+      dragListener={false}
+      dragControls={dragControls}
+      whileDrag={{ scale: 1.02, boxShadow: "0 10px 25px rgba(0,0,0,0.15)" }}
+      className="space-y-6 bg-[#F9FAFB] p-5 border border-[#A0ABC0] rounded-xl relative"
+    >
       <div className="flex gap-3 items-center">
+        <div
+          onPointerDown={(e) => dragControls.start(e)}
+          className="cursor-grab active:cursor-grabbing touch-none text-[#717D96] -ml-2"
+          aria-label="Drag to reorder"
+        >
+          <GripVertical className="h-6 w-6" />
+        </div>
         {currentOption?.value === "email" ? (
           <Mail className="h-9 w-9" color="#1E2A3A" />
         ) : currentOption?.value === "custom" ? (
@@ -117,7 +139,7 @@ const Socials = ({
         </div>
         <Trash className="cursor-pointer hover:text-red-500 transition-colors" color="#717D96" onClick={onDelete} />
       </div>
-    </section>
+    </Reorder.Item>
   );
 };
 
@@ -216,7 +238,12 @@ export const EditProfile = () => {
 
     //check for social links
     if (socialArray) {
-      myform.append("social_links", JSON.stringify(socialArray));
+      myform.append(
+        "social_links",
+        JSON.stringify(
+          socialArray.map(({ _key, ...link }, i) => ({ ...link, order: i })),
+        ),
+      );
     } else {
       toast.error("No social links");
       return;
@@ -234,7 +261,11 @@ export const EditProfile = () => {
       setTextlength(cardData?.bio || ""); //bio
       setName(cardData?.display_name || ""); //display name
       cardData?.social_links
-        ? setSocialArray(cardData.social_links)
+        ? setSocialArray(
+            [...cardData.social_links]
+              .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
+              .map((link: any) => ({ ...link, _key: link._id || newKey() })),
+          )
         : setSocialArray([]); //social links
       setApiImage(cardData?.profile_photo || null); //profile photo
     };
@@ -314,18 +345,26 @@ export const EditProfile = () => {
             {socialArray.length === 0 || socialArray === undefined ? (
               <p>No Social Media Available</p>
             ) : (
-              socialArray.map((item, i) => (
-                <Socials
-                  key={i}
-                  platform={item.platform}
-                  url={item.url}
-                  title={item.title}
-                  visibility={item.visible}
-                  onDelete={() => deleteItem(i)}
-                  update={updateItem}
-                  index={i}
-                />
-              ))
+              <Reorder.Group
+                axis="y"
+                values={socialArray}
+                onReorder={setSocialArray}
+                className="space-y-6"
+              >
+                {socialArray.map((item, i) => (
+                  <Socials
+                    key={item._key}
+                    item={item}
+                    platform={item.platform}
+                    url={item.url}
+                    title={item.title}
+                    visibility={item.visible}
+                    onDelete={() => deleteItem(i)}
+                    update={updateItem}
+                    index={i}
+                  />
+                ))}
+              </Reorder.Group>
             )}
 
             <button
@@ -335,6 +374,7 @@ export const EditProfile = () => {
                 setSocialArray((prev) => [
                   ...prev,
                   {
+                    _key: newKey(),
                     platform: "",
                     url: "",
                     visible: true,

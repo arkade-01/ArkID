@@ -168,7 +168,9 @@ export const Profile = () => {
             </button>
           </div>
         ) : (
-          allInfo?.data.social_links?.map((item: any, i: number) =>
+          [...(allInfo?.data.social_links ?? [])]
+            .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
+            .map((item: any, i: number) =>
             item.visible === true ? (
               <PersonalLinks key={i} platform={item.platform} url={item.url} title={item.title} />
             ) : null

@@ -87,7 +87,9 @@ const Dashboard = () => {
           if (card) {
             setCardEnabled(card.isActivated);
             if (card.social_links) {
-              setSocialLinks(card.social_links);
+              setSocialLinks(
+                [...card.social_links].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+              );
             }
           }
         } else {
